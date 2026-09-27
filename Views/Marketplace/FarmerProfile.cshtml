@@ -1,0 +1,24 @@
+@model User
+
+@{
+    ViewData["Title"] = "Farmer Profile";
+}
+
+<section class="page">
+    <span class="pill">Farmer</span>
+    <h1>@Model.FullName</h1>
+    <p>@Model.Address</p>
+
+    <h2>Products</h2>
+
+    <div class="grid">
+        @foreach (var p in Model.Products.Where(x => x.IsActive))
+        {
+            <article class="card">
+                <h3>@p.Name</h3>
+                <p>@p.Category</p>
+                <strong>Rs. @p.Price.ToString("N0")</strong>
+            </article>
+        }
+    </div>
+</section>

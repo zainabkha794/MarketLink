@@ -1,0 +1,85 @@
+@model RegisterVm
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <!-- Header Banner -->
+                <div class="bg-primary bg-gradient text-white text-center p-4">
+                    <div class="mb-2">
+                        <i class="bi bi-person-plus-fill display-4"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1">Create Account</h2>
+                    <p class="text-white-50 mb-0">Join MarketLink to start shopping</p>
+                </div>
+
+                <!-- Form Body -->
+                <div class="card-body p-4 p-sm-5 bg-white">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 mb-4" role="alert"></div>
+
+                        <!-- Full Name -->
+                        <div class="form-floating mb-3">
+                            <input asp-for="FullName" class="form-control rounded-3" id="fullNameInput" placeholder="Full Name" required />
+                            <label for="fullNameInput"><i class="bi bi-person me-2"></i>Full Name</label>
+                            <span asp-validation-for="FullName" class="text-danger small ms-1"></span>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control rounded-3" id="emailInput" placeholder="name@example.com" required />
+                            <label for="emailInput"><i class="bi bi-envelope me-2"></i>Email Address</label>
+                            <span asp-validation-for="Email" class="text-danger small ms-1"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-floating mb-3">
+                            <input asp-for="Password" type="password" class="form-control rounded-3" id="passwordInput" placeholder="Password" required />
+                            <label for="passwordInput"><i class="bi bi-lock me-2"></i>Password</label>
+                            <span asp-validation-for="Password" class="text-danger small ms-1"></span>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="form-floating mb-3">
+                            <input asp-for="Phone" class="form-control rounded-3" id="phoneInput" placeholder="Phone Number" />
+                            <label for="phoneInput"><i class="bi bi-telephone me-2"></i>Phone Number</label>
+                            <span asp-validation-for="Phone" class="text-danger small ms-1"></span>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Address" class="form-control rounded-3" id="addressInput" placeholder="Address" style="height: 100px;"></textarea>
+                            <label for="addressInput"><i class="bi bi-geo-alt me-2"></i>Address</label>
+                            <span asp-validation-for="Address" class="text-danger small ms-1"></span>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 fw-semibold py-3 shadow-sm hover-elevate">
+                            <i class="bi bi-person-check me-2"></i>Register
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Footer Link -->
+                <div class="card-footer bg-light border-0 text-center py-3">
+                    <span class="text-muted small">Already have an account?</span>
+                    <a asp-action="Login" class="text-primary fw-bold text-decoration-none ms-1">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-elevate {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .hover-elevate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(13, 110, 253, 0.25) !important;
+        }
+</style>

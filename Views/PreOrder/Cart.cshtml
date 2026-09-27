@@ -1,0 +1,375 @@
+@model CartVm
+
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<style>
+    /* Scoped Design Tokens */
+    :root {
+        --cart-primary: #0F5257;
+        --cart-primary-hover: #175E54;
+        --cart-dark: #0F172A;
+        --cart-muted: #64748B;
+        --cart-border: #E2E8F0;
+        --cart-bg-subtle: #F8FAFC;
+        --cart-radius: 16px;
+        --cart-shadow: 0 4px 20px -2px rgba(15, 82, 87, 0.05);
+    }
+
+    .cart-wrapper {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 1.5rem 0 3rem 0;
+    }
+
+    .cart-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--cart-dark);
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
+    }
+
+    .cart-subtitle {
+        color: var(--cart-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Grid Layout */
+    .cart-grid {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 1.75rem;
+        align-items: start;
+    }
+
+    @@media (max-width: 900px) {
+        .cart-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Main Items Card */
+    .cart-card {
+        background: #FFFFFF;
+        border: 1px solid var(--cart-border);
+        border-radius: var(--cart-radius);
+        box-shadow: var(--cart-shadow);
+        overflow: hidden;
+    }
+
+    .cart-item-row {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.25rem;
+        border-bottom: 1px solid #F1F5F9;
+        transition: background-color 0.2s ease;
+    }
+
+        .cart-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-row:hover {
+            background-color: var(--cart-bg-subtle);
+        }
+
+    /* Thumbnail Box */
+    .item-thumb {
+        width: 72px;
+        height: 72px;
+        border-radius: 12px;
+        background: #F1F5F9;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 1px solid var(--cart-border);
+    }
+
+    .item-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .item-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--cart-dark);
+        margin: 0 0 0.35rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .item-unit-price {
+        font-size: 0.875rem;
+        color: var(--cart-muted);
+        font-weight: 500;
+    }
+
+    /* Quantity Pill Controls */
+    .qty-control-pill {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--cart-border);
+        border-radius: 8px;
+        background: #FFFFFF;
+        overflow: hidden;
+    }
+
+    .qty-btn {
+        background: transparent;
+        border: none;
+        padding: 0.25rem 0.6rem;
+        color: var(--cart-dark);
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+        .qty-btn:hover {
+            background: #F1F5F9;
+        }
+
+    .qty-val {
+        padding: 0 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--cart-dark);
+    }
+
+    .item-total-price {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--cart-primary);
+        text-align: right;
+        min-width: 100px;
+    }
+
+    /* Action Buttons */
+    .btn-remove-icon {
+        background: rgba(220, 38, 38, 0.08);
+        color: #DC2626;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .btn-remove-icon:hover {
+            background: #DC2626;
+            color: #FFFFFF;
+        }
+
+    /* Summary Card Sticky Panel */
+    .summary-card {
+        background: #FFFFFF;
+        border: 1px solid var(--cart-border);
+        border-radius: var(--cart-radius);
+        padding: 1.75rem;
+        box-shadow: var(--cart-shadow);
+        position: sticky;
+        top: 24px;
+    }
+
+    .summary-header {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--cart-dark);
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.85rem;
+        font-size: 0.95rem;
+        color: var(--cart-muted);
+    }
+
+    .summary-divider {
+        height: 1px;
+        border-top: 2px dashed var(--cart-border);
+        margin: 1rem 0;
+    }
+
+    .summary-item.total-row {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--cart-dark);
+    }
+
+    .btn-primary-action {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 0.9rem 1rem;
+        background: var(--cart-primary);
+        color: #FFFFFF;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        border: none;
+        box-shadow: 0 4px 12px rgba(15, 82, 87, 0.2);
+    }
+
+        .btn-primary-action:hover {
+            background: var(--cart-primary-hover);
+            color: #FFFFFF;
+            transform: translateY(-1px);
+        }
+
+    .btn-secondary-action {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 0.75rem 1rem;
+        background: transparent;
+        color: var(--cart-muted);
+        border: 1px solid var(--cart-border);
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        margin-top: 0.75rem;
+        transition: all 0.2s ease;
+    }
+
+        .btn-secondary-action:hover {
+            background: var(--cart-bg-subtle);
+            color: var(--cart-dark);
+        }
+
+    /* Empty Cart Modern Visual State */
+    .empty-card-wrapper {
+        background: #FFFFFF;
+        border: 1px solid var(--cart-border);
+        border-radius: 24px;
+        padding: 4rem 2rem;
+        text-align: center;
+        max-width: 480px;
+        margin: 2rem auto;
+        box-shadow: var(--cart-shadow);
+    }
+
+    .empty-cart-badge {
+        width: 80px;
+        height: 80px;
+        background: rgba(15, 82, 87, 0.08);
+        color: var(--cart-primary);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.25rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<div class="cart-wrapper">
+    <div class="mb-4">
+        <h1 class="cart-title">Your Shopping Cart</h1>
+        <p class="cart-subtitle">Review items in your order before checkout</p>
+    </div>
+
+    @if (!Model.Products.Any())
+    {
+        <div class="empty-card-wrapper">
+            <div class="empty-cart-badge">
+                <i class="bi bi-cart-x"></i>
+            </div>
+            <h2 class="fw-bold text-dark mb-2">Your cart is empty</h2>
+            <p class="text-muted mb-4 fs-6">Looks like you haven't added any fresh produce to your cart yet.</p>
+            <a class="btn-primary-action d-inline-block w-auto px-4"
+               asp-controller="Marketplace" asp-action="Index">
+                <i class="bi bi-grid-fill me-2"></i> Browse Marketplace
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="cart-grid">
+            <!-- Left Side: Product List -->
+            <div class="cart-card">
+                @foreach (var p in Model.Products)
+                {
+                    var qty = Model.Quantities.GetValueOrDefault(p.Id, 1);
+                    var itemTotal = p.Price * qty;
+
+                    <div class="cart-item-row">
+                        <!-- Product Thumbnail -->
+                        <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=150&q=80" : p.ImageUrl)"
+                             alt="@p.Name" class="item-thumb" />
+
+                        <!-- Details & Meta -->
+                        <div class="item-details">
+                            <h3 class="item-name">@p.Name</h3>
+                            <span class="item-unit-price">Rs. @p.Price.ToString("N0") / unit</span>
+                        </div>
+
+                        <!-- Quantity Indicator / Controls -->
+                        <div class="qty-control-pill">
+                            <span class="qty-val">Qty: @qty</span>
+                        </div>
+
+                        <!-- Price Calculation -->
+                        <div class="item-total-price">
+                            Rs. @itemTotal.ToString("N0")
+                        </div>
+
+                        <!-- Remove Action Form -->
+                        <form asp-action="RemoveFromCart" method="post" style="margin: 0;">
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button type="submit" class="btn-remove-icon" title="Remove item">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+
+            <!-- Right Side: Order Summary Panel -->
+            <div class="summary-card">
+                <h2 class="summary-header">Order Summary</h2>
+
+                <div class="summary-item">
+                    <span>Items Count</span>
+                    <span class="fw-bold text-dark">@Model.Products.Count</span>
+                </div>
+
+                <div class="summary-item">
+                    <span>Subtotal</span>
+                    <span class="fw-bold text-dark">Rs. @Model.Total.ToString("N0")</span>
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="summary-item total-row">
+                    <span>Total Amount</span>
+                    <span style="color: var(--cart-primary);">Rs. @Model.Total.ToString("N0")</span>
+                </div>
+
+                <div class="mt-4">
+                    <a asp-action="Checkout" class="btn-primary-action">
+                        Proceed to Checkout <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                    <a asp-controller="Marketplace" asp-action="Index" class="btn-secondary-action">
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

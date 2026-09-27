@@ -1,0 +1,140 @@
+@model AdminVm
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h2 fw-bold mb-1 text-dark">Admin Dashboard</h1>
+            <p class="text-muted mb-0">Overview of platform users, products, and order activity.</p>
+        </div>
+        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-medium">
+            <i class="bi bi-shield-check me-1"></i> Administrator View
+        </span>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="row g-3 mb-5">
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white hover-elevate">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-3 p-3 bg-primary bg-opacity-10 text-primary me-3 fs-3">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Users</div>
+                        <h2 class="fw-bold mb-0 text-dark">@Model.Users.Count</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white hover-elevate">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-3 p-3 bg-success bg-opacity-10 text-success me-3 fs-3">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Products</div>
+                        <h2 class="fw-bold mb-0 text-dark">@Model.Products.Count</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white hover-elevate">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-3 p-3 bg-warning bg-opacity-10 text-warning me-3 fs-3">
+                        <i class="bi bi-cart-check-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Orders</div>
+                        <h2 class="fw-bold mb-0 text-dark">@Model.Orders.Count</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Section -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 border-0 d-flex align-items-center justify-content-between">
+            <h2 class="h5 fw-bold mb-0 text-dark">
+                <i class="bi bi-receipt me-2 text-primary"></i>Recent Orders
+            </h2>
+            <span class="badge bg-light text-dark border">@Model.Orders.Count Orders</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light border-bottom">
+                    <tr>
+                        <th scope="col" class="ps-4"># Order ID</th>
+                        <scope ="col">
+                            Customer</thscope=>
+                            <th scope="col">Total Amount</th>
+                            <th scope="col">Current Status</th>
+                            <th scope="col" class="pe-4">Change Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in Model.Orders)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold text-secondary">#@o.Id</td>
+                                <td>
+                                    <div class="fw-semibold text-dark">@(o.Customer?.FullName ?? "N/A")</div>
+                                </td>
+                                <td class="fw-bold text-success">
+                                    Rs. @o.TotalAmount.ToString("N0")
+                                </td>
+                                <td>
+                                    @{
+                                        var badgeClass = o.Status.ToString() switch
+                                        {
+                                            "Completed" or "Delivered" => "bg-success text-success",
+                                            "Pending" => "bg-warning text-warning",
+                                            "Cancelled" => "bg-danger text-danger",
+                                            _ => "bg-info text-info"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass bg-opacity-10 px-3 py-2 rounded-pill fw-medium">
+                                        @o.Status
+                                    </span>
+                                </td>
+                                <td class="pe-4">
+                                    <form asp-action="UpdateOrderStatus" method="post" class="d-flex gap-2 align-items-center">
+                                        <input type="hidden" name="id" value="@o.Id" />
+                                        <select name="status" class="form-select form-select-sm rounded-3" style="min-width: 130px;">
+                                            @foreach (var s in Enum.GetValues<OrderStatus>())
+                                            {
+                                                <option selected="@(s == o.Status)" value="@s">@s</option>
+                                            }
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-primary rounded-3 px-3 fw-semibold">
+                                            <i class="bi bi-check-lg me-1"></i>Save
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .hover-elevate {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .hover-elevate:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+            }
+    </style>

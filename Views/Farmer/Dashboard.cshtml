@@ -1,0 +1,143 @@
+@model FarmerDashVm
+
+@{
+    ViewData["Title"] = "Farmer Dashboard";
+}
+
+<section class="page">
+    <div class="page-head">
+        <div>
+            <span class="pill">Farmer</span>
+            <h1>Seller Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Add Product</h2>
+        <form asp-controller="Farmer" asp-action="AddProduct" method="post" enctype="multipart/form-data" class="form-grid">
+            <input name="Name" placeholder="Product name" required />
+            <input name="Category" placeholder="Category" required />
+            <input name="Price" type="number" step="0.01" placeholder="Price" required />
+            <input name="StockQuantity" type="number" placeholder="Stock" required />
+
+            <select name="Unit" required>
+                <option value="kg">kg</option>
+                <option value="gm">gm</option>
+                <option value="liter">liter</option>
+                <option value="dozen">dozen</option>
+                <option value="piece">piece</option>
+                <option value="pack">pack</option>
+            </select>
+
+            <input name="ImageFile" type="file" accept="image/*" />
+            <input name="Description" placeholder="Description" />
+            <button type="submit" class="btn">Add Product</button>
+        </form>
+    </div>
+
+    <h2>Your Products</h2>
+    <div class="grid">
+        @foreach (var p in Model.Products)
+        {
+            <article class="card @(p.IsActive ? "" : "inactive-card")">
+                <!-- Fixed Image Wrapper -->
+                <div class="card-media">
+                    @if (!string.IsNullOrEmpty(p.ImageUrl))
+                    {
+                        <img src="@p.ImageUrl" alt="@p.Name" class="card-img" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="placeholder-thumb">🌾</div>
+                    }
+                </div>
+
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h3 style="margin: 0;">@p.Name</h3>
+                        <!-- Status Badge -->
+                        @if (p.IsActive)
+                        {
+                            <span class="badge active">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge inactive">Inactive</span>
+                        }
+                    </div>
+                    <p class="meta">@p.Category · @p.StockQuantity @p.Unit</p>
+                    <strong class="price">Rs. @p.Price.ToString("N0")</strong>
+                </div>
+                <!-- Action Buttons Section -->
+                <div class="actions" style="display: flex; gap: 0.5rem; width: 100%;">
+                    <!-- 1. Activate / Deactivate Button -->
+                    <form asp-controller="Farmer" asp-action="ToggleProductStatus" method="post" style="flex: 1;">
+                        <input type="hidden" name="id" value="@p.Id" />
+                        @if (p.IsActive)
+                        {
+                            <button type="submit" class="btn warning" style="width: 100%; font-size: 0.85rem;" onclick="return confirm('Deactivate this product?');">
+                                Deactivate
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn success" style="width: 100%; font-size: 0.85rem;">
+                                Activate
+                            </button>
+                        }
+                    </form>
+
+                    <!-- 2. Permanent Delete Button -->
+                    <form asp-controller="Farmer" asp-action="DeleteProduct" method="post" style="flex: 1;">
+                        <input type="hidden" name="id" value="@p.Id" />
+                        <button type="submit" class="btn danger" style="width: 100%; font-size: 0.85rem;" onclick="return confirm('Are you sure you want to permanently delete this product?');">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Action Button -->
+                <div class="actions">
+                    <form asp-controller="Farmer" asp-action="ToggleProductStatus" method="post" style="width: 100%;">
+                        <input type="hidden" name="id" value="@p.Id" />
+                        @if (p.IsActive)
+                        {
+                            <button type="submit" class="btn danger" style="width: 100%;" onclick="return confirm('Are you sure you want to deactivate this product?');">
+                                Deactivate
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn success" style="width: 100%;">
+                                Activate
+                            </button>
+                        }
+                    </form>
+                </div>
+            </article>
+        }
+    </div>
+
+    <h2>Related Orders</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model.Orders)
+                {
+                    <tr>
+                        <td>#@o.Id</td>
+                        <td>Rs. @o.TotalAmount.ToString("N0")</td>
+                        <td><span class="status">@o.Status</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

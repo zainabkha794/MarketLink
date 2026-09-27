@@ -1,0 +1,14 @@
+@model Order
+
+@{
+    ViewData["Title"] = "Order Confirmed";
+}
+
+<section class="page">
+    <span class="pill">Order placed</span>
+    <h1>Thank you!</h1>
+    <p>Order #@Model.Id has been created.</p>
+    <h2>Rs. @Model.TotalAmount.ToString("N0")</h2>
+    <p>Status: <b>@Model.Status</b></p>
+    <a class="btn" asp-controller="Customer" asp-action="Dashboard">View My Orders</a>
+</section>

@@ -1,0 +1,56 @@
+@{
+    ViewData["Title"] = "Privacy";
+}
+
+<div class="container py-5">
+    <!-- Header Banner -->
+    <div class="card border-0 bg-primary bg-gradient text-white rounded-4 overflow-hidden mb-5 shadow-sm">
+        <div class="card-body p-4 p-md-5 text-center">
+            <div class="mb-3">
+                <i class="bi bi-shield-check display-3 text-white-50"></i>
+            </div>
+            <h1 class="display-5 fw-bold mb-2">Privacy & Data Policy</h1>
+            <p class="lead text-white-50 mx-auto mb-0" style="max-width: 650px;">
+                Understanding how data is handled and stored within the MarketLink application ecosystem.
+            </p>
+        </div>
+    </div>
+
+    <!-- Content Card -->
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="rounded-circle p-3 bg-warning bg-opacity-10 text-warning d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="bi bi-database-fill-gear fs-3"></i>
+                    </div>
+                    <div>
+                        <h2 class="h4 fw-bold text-dark mb-0">Database & Security Setup</h2>
+                        <span class="text-muted small">Environment and deployment guidelines</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning border-0 rounded-3 p-4 mb-4" role="alert">
+                    <div class="d-flex gap-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 text-warning flex-shrink-0"></i>
+                        <div>
+                            <h5 class="fw-bold mb-1">Local Development Environment</h5>
+                            <p class="mb-0 text-dark opacity-75">
+                                Demo project data is stored locally in the application's SQLite database. Use production authentication, secrets management and HTTPS configuration before deployment.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4 text-muted opacity-25" />
+
+                <div class="d-flex align-items-center justify-content-between text-muted small">
+                    <span><i class="bi bi-info-circle me-1"></i> MarketLink Demo Architecture</span>
+                    <a asp-controller="Home" asp-action="Index" class="text-primary fw-semibold text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

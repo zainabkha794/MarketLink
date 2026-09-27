@@ -1,0 +1,61 @@
+@model MarketLink.Models.Product
+
+@{
+    ViewData["Title"] = $"{Model.Name} - MarketLink";
+}
+
+<div class="product-details-wrapper">
+    <div class="product-details-card">
+
+        <!-- Left Column: Product Image -->
+        <div class="details-media-container">
+            @{
+                var imgPath = string.IsNullOrWhiteSpace(Model.ImageUrl)
+                    ? null
+                    : (Model.ImageUrl.StartsWith("/") ? Model.ImageUrl : "/" + Model.ImageUrl);
+            }
+
+            @if (!string.IsNullOrEmpty(imgPath))
+            {
+                <img src="@Url.Content("~" + imgPath)" alt="@Model.Name" class="details-media-img" loading="lazy" />
+            }
+            else
+            {
+                <div class="details-placeholder">
+                    <span>🌾</span>
+                </div>
+            }
+        </div>
+
+        <!-- Right Column: Product Information -->
+        <div class="details-content">
+            <div class="details-header">
+                <span class="category-badge">@Model.Category</span>
+                <h1 class="product-title">@Model.Name</h1>
+            </div>
+
+            <p class="product-description">
+                @(string.IsNullOrWhiteSpace(Model.Description) ? "No description provided for this product." : Model.Description)
+            </p>
+
+            <div class="price-block">
+                <span class="price-amount">Rs. @Model.Price.ToString("N0")</span>
+                <span class="price-unit">/ @Model.Unit</span>
+            </div>
+
+            <div class="stock-info">
+                Available Stock: <strong>@Model.StockQuantity @Model.Unit</strong>
+            </div>
+
+            <!-- Action Form -->
+            <form asp-controller="PreOrder" asp-action="AddToCart" method="post" class="add-to-cart-form">
+                <input type="hidden" name="productId" value="@Model.Id" />
+                <div class="form-inputs">
+                    <input type="number" name="quantity" value="1" min="1" max="@Model.StockQuantity" class="qty-input" />
+                    <button type="submit" class="btn-add-cart">Add to Cart</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>

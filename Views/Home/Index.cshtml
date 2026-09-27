@@ -1,0 +1,67 @@
+@model List<MarketLink.Models.Product>
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="page">
+    <!-- Hero Banner Section -->
+    <div class="hero">
+        <div>
+            <span class="pill">🌱 Fresh • Local • Direct</span>
+            <h1>MarketLink</h1>
+            <p>Connect local farmers with customers through one simple, fresh marketplace.</p>
+            <br />
+            <a asp-controller="Marketplace" asp-action="Index" class="btn">
+                Browse Marketplace
+            </a>
+        </div>
+        <div class="hero-card">
+            <span class="pill" style="width: fit-content;">Verified Quality</span>
+            <b>Farm Fresh Produce</b>
+            <p style="margin: 5px 0 0 0; color: #556256; font-size: 14px;">Directly from local verified sellers</p>
+        </div>
+    </div>
+
+    <!-- Section Heading -->
+    <div class="page-head" style="margin-bottom: 20px;">
+        <div>
+            <h2>Featured Products</h2>
+            <p style="color: #667267; margin-top: -5px;">Handpicked fresh produce directly from farm catalog</p>
+        </div>
+        <a asp-controller="Marketplace" asp-action="Index" class="btn small">View All</a>
+    </div>
+
+    <!-- Product Grid Section -->
+    <div class="grid">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var p in Model)
+            {
+                <article class="card">
+                    <div class="thumb">
+                        @if (!string.IsNullOrEmpty(p.ImageUrl))
+                        {
+                            <img src="@p.ImageUrl" alt="@p.Name" class="card-img" />
+                        }
+                        else
+                        {
+                            <span>🌾</span>
+                        }
+                    </div>
+                    <h3>@p.Name</h3>
+                    <p>@p.Category · @p.StockQuantity @p.Unit</p>
+                    <strong>Rs. @p.Price.ToString("N0")</strong>
+
+                    <a asp-controller="Marketplace" asp-action="Details" asp-route-id="@p.Id" class="btn small" style="text-align: center; margin-top: 5px;">
+                        View Details
+                    </a>
+                </article>
+            }
+        }
+        else
+        {
+            <p>No featured products available right now.</p>
+        }
+    </div>
+</section>

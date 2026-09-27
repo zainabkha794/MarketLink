@@ -1,0 +1,75 @@
+@model MarketplaceVm
+
+@{
+    ViewData["Title"] = "Marketplace";
+}
+
+<section class="page">
+    <div class="page-head">
+        <div>
+            <span class="pill">Marketplace</span>
+            <h1>Fresh Products</h1>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <form class="filters" method="get" asp-controller="Marketplace" asp-action="Index">
+        <input name="search" value="@Model.Search" placeholder="Search products..." />
+
+        <select name="category" onchange="this.form.submit()">
+            <option value="">All categories</option>
+            @foreach (var c in Model.Categories)
+            {
+                <option selected="@(c == Model.Category)" value="@c">@c</option>
+            }
+        </select>
+
+        <button type="submit" class="btn">Search</button>
+
+        @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.Category))
+        {
+            <a asp-action="Index" class="btn secondary" style="text-decoration:none;">Clear Filters</a>
+        }
+    </form>
+
+    <!-- Grid Container -->
+    <div class="grid">
+        @if (!Model.Products.Any())
+        {
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <p class="text-muted">No products found matching your search or category.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var p in Model.Products)
+            {
+                <article class="card">
+                    <!-- Fixed Image Wrapper Container -->
+                    <div class="card-media">
+                        @if (!string.IsNullOrEmpty(p.ImageUrl))
+                        {
+                            <img src="@p.ImageUrl" alt="@p.Name" class="card-img" loading="lazy" />
+                        }
+                        else
+                        {
+                            <div class="placeholder-thumb">🥬</div>
+                        }
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <h3>@p.Name</h3>
+                        <p class="meta">@p.Category · @p.StockQuantity @p.Unit</p>
+                        <strong class="price">Rs. @p.Price.ToString("N0")</strong>
+                    </div>
+
+                    <!-- Card Footer / Actions -->
+                    <div class="actions">
+                        <a class="btn" asp-action="Details" asp-route-id="@p.Id">View Details</a>
+                    </div>
+                </article>
+            }
+        }
+    </div>
+</section>

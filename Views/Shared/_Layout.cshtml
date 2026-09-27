@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - MarketLink</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header class="nav">
+        <a class="brand" asp-controller="Home" asp-action="Index">MarketLink</a>
+        <nav>
+            <a asp-controller="Marketplace" asp-action="Index">Marketplace</a>
+            <a asp-controller="Home" asp-action="About">About</a>
+
+            @if (Context.Session.GetString("Role") == "Farmer")
+            {
+                <a asp-controller="Farmer" asp-action="Dashboard">Farmer Dashboard</a>
+            }
+
+            @if (Context.Session.GetString("Role") == "Customer")
+            {
+                <a asp-controller="Customer" asp-action="Dashboard">My Orders</a>
+            }
+
+            @if (Context.Session.GetString("Role") == "Admin")
+            {
+                <a asp-controller="Admin" asp-action="Dashboard">Admin</a>
+            }
+
+            <a asp-controller="PreOrder" asp-action="Cart">Cart</a>
+            <a asp-controller="Chatbot" asp-action="Index">Help</a>
+
+            @if (Context.Session.GetInt32("UserId") == null)
+            {
+                <a class="btn small" asp-controller="Account" asp-action="Login">Login</a>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Logout">Logout</a>
+            }
+        </nav>
+    </header>
+
+    <main class="container">
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert">@TempData["Error"]</div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <footer>
+        © @DateTime.Now.Year MarketLink · Farmer-to-customer marketplace
+    </footer>
+
+    <script src="~/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

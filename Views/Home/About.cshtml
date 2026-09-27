@@ -1,0 +1,242 @@
+@{
+    ViewData["Title"] = "About MarketLink";
+}
+
+<style>
+    /* Clean Custom About Styling aligned with site.css */
+    .about-container {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 10px 0 40px 0;
+    }
+
+    /* Modern Visual Hero */
+    .about-hero {
+        position: relative;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(15, 82, 87, 0.88), rgba(43, 147, 72, 0.82)), url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+        padding: 4.5rem 2rem;
+        color: #ffffff;
+        text-align: center;
+        box-shadow: 0 15px 35px rgba(15, 82, 87, 0.15);
+        margin-bottom: 2.5rem;
+    }
+
+    .about-hero-pill {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 6px 18px;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .about-hero h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+
+    .about-hero p {
+        max-width: 700px;
+        margin: 0 auto;
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.6;
+    }
+
+    /* Pillars Grid */
+    .pillars-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .pillar-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .pillar-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(15, 82, 87, 0.12);
+            border-color: rgba(43, 147, 72, 0.4);
+        }
+
+    .pillar-img-box {
+        height: 210px;
+        width: 100%;
+        overflow: hidden;
+    }
+
+        .pillar-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+    .pillar-card:hover .pillar-img-box img {
+        transform: scale(1.06);
+    }
+
+    .pillar-body {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+        .pillar-body h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .pillar-body p {
+            color: #64748b;
+            font-size: 0.925rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+    /* Mission Section */
+    .section-title-wrap {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+        .section-title-wrap h2 {
+            font-weight: 800;
+            color: #0f172a;
+            font-size: 1.8rem;
+        }
+
+    .accent-line {
+        width: 50px;
+        height: 4px;
+        background: #2b9348;
+        border-radius: 2px;
+        margin: 8px auto 0 auto;
+    }
+
+    .mission-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .mission-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.75rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .mission-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: rgba(43, 147, 72, 0.12);
+        color: #2b9348;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .mission-text h4 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+
+    .mission-text p {
+        color: #64748b;
+        font-size: 0.925rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+</style>
+
+<div class="about-container">
+    <!-- Hero Banner -->
+    <section class="about-hero">
+        <span class="about-hero-pill">🌱 Connecting Agriculture &amp; Technology</span>
+        <h1>About MarketLink</h1>
+        <p>MarketLink is a digital fresh produce marketplace that bridges the gap between produce growers and commercial buyers, ensuring pricing transparency from farm to table.</p>
+    </section>
+
+    <!-- Visual Pillars Grid -->
+    <section class="pillars-grid">
+        <article class="pillar-card">
+            <div class="pillar-img-box">
+                <img src="https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?auto=format&fit=crop&w=700&q=80" alt="Farmer in field" />
+            </div>
+            <div class="pillar-body">
+                <h3>Direct Sellers</h3>
+                <p>Empowering local growers with direct market access, fair profits, and total operational control.</p>
+            </div>
+        </article>
+
+        <article class="pillar-card">
+            <div class="pillar-img-box">
+                <img src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=700&q=80" alt="Fresh organic produce" />
+            </div>
+            <div class="pillar-body">
+                <h3>Fresh Produce</h3>
+                <p>Diverse dynamic catalog featuring farm-fresh seasonal harvests directly sourced daily.</p>
+            </div>
+        </article>
+
+        <article class="pillar-card">
+            <div class="pillar-img-box">
+                <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=700&q=80" alt="Supply chain logistics" />
+            </div>
+            <div class="pillar-body">
+                <h3>Trackable Orders</h3>
+                <p>Reliable logistics workflow with total origin transparency for commercial and direct buyers.</p>
+            </div>
+        </article>
+    </section>
+
+    <!-- Mission Section -->
+    <section>
+        <div class="section-title-wrap">
+            <h2>Our Mission</h2>
+            <div class="accent-line"></div>
+        </div>
+
+        <div class="mission-grid">
+            <div class="mission-box">
+                <div class="mission-icon">📈</div>
+                <div class="mission-text">
+                    <h4>Empowering Local Growers</h4>
+                    <p>We eliminate unnecessary middle-channel markups. By giving growers direct access to digital buyers, farmers retain higher margins while scaling their operations efficiently.</p>
+                </div>
+            </div>
+
+            <div class="mission-box">
+                <div class="mission-icon">🛡️</div>
+                <div class="mission-text">
+                    <h4>Farm-to-Door Transparency</h4>
+                    <p>Commercial and individual buyers get direct access to fresh harvests with verified origin tracking, clear dynamic pricing, and simplified bulk-ordering options.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

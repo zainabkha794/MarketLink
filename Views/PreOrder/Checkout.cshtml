@@ -1,0 +1,16 @@
+@model CartVm
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="auth">
+    <h1>Checkout</h1>
+    <p>Total: <b>Rs. @Model.Total.ToString("N0")</b></p>
+
+    <form method="post">
+        <label>Delivery address</label>
+        <textarea name="address" required placeholder="Full delivery address"></textarea>
+        <button class="btn">Place Order</button>
+    </form>
+</div>
