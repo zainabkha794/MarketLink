@@ -1,0 +1,144 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin dashboard";
+    var maxRev = Model.RevenueByMarket.Any() ? Math.Max(Model.RevenueByMarket.Max(m => m.Revenue), 1) : 1;
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a> <span>›</span> <span>Admin dashboard</span></div>
+        <h1>The steward's ledger 🛡</h1>
+        <p>Platform health, approvals and performance at a glance.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        @if (Model.PendingFarmerApprovals > 0)
+        {
+            <div class="flash flash-info">
+                <span class="flash-icon">⏳</span>
+                <div>
+                    <strong>@Model.PendingFarmerApprovals stall application(s) awaiting review.</strong>
+                    <a asp-action="Farmers"><u>Review them now →</u></a>
+                </div>
+            </div>
+        }
+
+        <div class="grid grid-4 mb-4">
+            <div class="stat-card reveal">
+                <div class="stat-label">Total farmers</div>
+                <div class="stat-value">@Model.TotalFarmers</div>
+                <a asp-action="Farmers" class="muted" style="font-size:.85rem;">Manage →</a>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-label">Total customers</div>
+                <div class="stat-value">@Model.TotalCustomers</div>
+                <a asp-action="Customers" class="muted" style="font-size:.85rem;">Manage →</a>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-label">Markets</div>
+                <div class="stat-value">@Model.TotalMarkets</div>
+                <a asp-action="Markets" class="muted" style="font-size:.85rem;">Manage →</a>
+            </div>
+            <div class="stat-card reveal gold">
+                <div class="stat-label">Total orders</div>
+                <div class="stat-value">@Model.TotalOrders</div>
+                <div class="stat-delta">Revenue Rs @Model.TotalRevenue.ToString("N0")</div>
+            </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1.15fr 1fr; gap:32px; align-items:start;">
+            <div class="card card-pad reveal">
+                <div class="section-kicker">Analytics</div>
+                <h2 style="font-size:1.65rem;">Revenue by market</h2>
+                @if (Model.RevenueByMarket.Any())
+                {
+                    <div class="bar-chart mt-3" style="margin-bottom:32px;">
+                        @foreach (var m in Model.RevenueByMarket)
+                        {
+                            var pct = (int)Math.Max(6, Math.Round(m.Revenue / maxRev * 100));
+                            <div class="bar hot" style="height:@pct%;">
+                                <div class="bar-val">Rs @m.Revenue.ToString("N0")</div>
+                                <div class="bar-label">@m.Market</div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="muted">Revenue data will appear after completed orders.</p>
+                }
+
+                <h3 class="mt-3">Recent orders</h3>
+                <div class="table-wrap" style="border:none; box-shadow:none;">
+                    <table class="table" style="min-width:0;">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Customer</th>
+                                <th>Farmer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var o in Model.RecentOrders)
+                            {
+                                var cls = o.Status switch
+                                {
+                                    OrderStatus.Placed => "pill-placed",
+                                    OrderStatus.Accepted => "pill-accepted",
+                                    OrderStatus.ReadyForPickup => "pill-ready",
+                                    OrderStatus.Completed => "pill-completed",
+                                    OrderStatus.Declined => "pill-declined",
+                                    _ => "pill-cancelled"
+                                };
+                                <tr>
+                                    <td><strong style="color:var(--forest-800);">@o.OrderNumber</strong></td>
+                                    <td>@o.Customer?.FullName</td>
+                                    <td>@(o.Farmer?.StallName ?? o.Farmer?.FullName)</td>
+                                    <td>Rs @o.TotalAmount.ToString("N0")</td>
+                                    <td><span class="pill @cls">@o.Status</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <div class="card card-pad reveal">
+                    <div class="section-kicker">Popularity</div>
+                    <h3 style="font-size:1.45rem;">Top products</h3>
+                    @if (Model.TopProducts.Any())
+                    {
+                        @foreach (var t in Model.TopProducts)
+                        {
+                            <div class="d-flex justify-between" style="padding:10px 0; border-bottom:1px dashed rgba(27,67,50,.12);">
+                                <strong style="font-size:.95rem;">@t.Name</strong>
+                                <span class="muted">Rs @t.Revenue.ToString("N0")</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="muted mb-0">No sales data yet.</p>
+                    }
+                </div>
+
+                <div class="card card-pad mt-3 reveal">
+                    <div class="section-kicker">Moderation</div>
+                    <h3 style="font-size:1.45rem;">Keep the market clean</h3>
+                    <p class="muted">Review listings and reviews that may violate platform guidelines.</p>
+                    <div class="d-flex gap-1 flex-wrap">
+                        <a class="btn btn-ghost btn-sm" asp-action="Moderation">Content moderation</a>
+                        <a class="btn btn-ghost btn-sm" asp-action="Categories">Categories</a>
+                        <a class="btn btn-ghost btn-sm" asp-action="Announcements">Announcements</a>
+                        <a class="btn btn-gold btn-sm" asp-action="Reports">📊 Generate report</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

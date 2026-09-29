@@ -1,0 +1,122 @@
+@model List<Product>
+@{
+    ViewData["Title"] = "My produce";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>My produce</span></div>
+        <h1>Weekly stock &amp; pricing</h1>
+        <p>List what you are bringing to market — customers see updates immediately.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="d-flex justify-between align-center flex-wrap gap-2 mb-3">
+            <div class="muted">@Model.Count listing(s) · @Model.Count(p => p.IsAvailable && !p.IsSoldOut) active</div>
+            <div class="d-flex gap-2 flex-wrap">
+                <form asp-action="ResetWeeklyStock" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-leaf">🔄 Reset weekly stock</button>
+                </form>
+                <a class="btn btn-gold" asp-action="CreateProduct">+ Add new produce</a>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-art">🌱</div>
+                <h3>Your stall is empty</h3>
+                <p class="muted">Add your first listing — name, price, unit and quantity is all it takes.</p>
+                <a class="btn btn-gold" asp-action="CreateProduct">List your first produce</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap reveal">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Produce</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Weekly</th>
+                            <th>Status</th>
+                            <th style="width:280px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex gap-1 align-center">
+                                        <div style="width:52px;height:46px;border-radius:10px;overflow:hidden;background:var(--mint-100); flex: 0 0 52px;">
+                                            @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                            {
+                                                <img src="@p.ImageUrl" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+                                            }
+                                        </div>
+                                        <div>
+                                            <strong style="color: var(--forest-900);">@p.Name</strong><br />
+                                            <a asp-controller="Marketplace" asp-action="Details" asp-route-id="@p.Id" class="muted" style="font-size:.8rem;">View listing →</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@p.Category?.Name</td>
+                                <td><strong>Rs @p.Price.ToString("N0")</strong> <span class="muted" style="font-size:.82rem;">/ @p.Unit</span></td>
+                                <td>
+                                    @if (p.StockQuantity <= 5 && !p.IsSoldOut)
+                                    {
+                                        <span class="pill pill-warn">@p.StockQuantity @p.Unit</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@p.StockQuantity @p.Unit</span>
+                                    }
+                                </td>
+                                <td>@(p.IsRecurringWeekly ? $"↺ {p.DefaultWeeklyQuantity}" : "—")</td>
+                                <td>
+                                    @if (!p.IsAvailable)
+                                    {
+                                        <span class="pill pill-neutral">Paused</span>
+                                    }
+                                    else if (p.IsSoldOut)
+                                    {
+                                        <span class="pill pill-cancelled">Sold out</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="pill pill-accepted">Live</span>
+                                    }
+                                    @if (!p.IsVisible)
+                                    {
+                                        <span class="pill pill-warn">Hidden</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        <a class="btn btn-ghost btn-sm" asp-action="EditProduct" asp-route-id="@p.Id">Edit</a>
+                                        <form asp-action="ToggleSoldOut" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@p.Id" />
+                                            <button type="submit" class="btn btn-leaf btn-sm">@(p.IsSoldOut ? "Restock" : "Sold out")</button>
+                                        </form>
+                                        <form asp-action="DeleteProduct" method="post" onsubmit="return confirm('Remove this listing?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@p.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,135 @@
+@model AdminReportViewModel
+@{
+    ViewData["Title"] = "Reports & analytics";
+    var maxRev = Model.RevenueByMarket.Any() ? Math.Max(Model.RevenueByMarket.Max(m => m.Revenue), 1) : 1;
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Reports</span></div>
+        <h1>Reports &amp; analytics</h1>
+        <p>Platform-wide sales performance — every report is logged in the ledger.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="card card-pad mb-4 reveal">
+            <form method="get" class="d-flex gap-2 align-center flex-wrap">
+                <div>
+                    <label class="form-label">From</label>
+                    <input class="form-control" type="date" name="from" value="@Model.From.ToString("yyyy-MM-dd")" />
+                </div>
+                <div>
+                    <label class="form-label">To</label>
+                    <input class="form-control" type="date" name="to" value="@Model.To.ToString("yyyy-MM-dd")" />
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-forest" style="margin-top:26px;">Generate report</button>
+                </div>
+                <div class="muted" style="margin-top:26px;">
+                    Orders in period: <strong>@Model.TotalOrders</strong> · Revenue: <strong>Rs @Model.Revenue.ToString("N0")</strong>
+                </div>
+            </form>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1.1fr 1fr; gap:32px; align-items:start;">
+            <div>
+                <div class="card card-pad reveal">
+                    <div class="section-kicker">By market</div>
+                    <h2 style="font-size:1.55rem;">Revenue summary</h2>
+                    @if (Model.RevenueByMarket.Any())
+                    {
+                        <div class="bar-chart mt-2" style="margin-bottom:32px;">
+                            @foreach (var m in Model.RevenueByMarket)
+                            {
+                                var pct = (int)Math.Max(6, Math.Round(m.Revenue / maxRev * 100));
+                                <div class="bar hot" style="height:@pct%;">
+                                    <div class="bar-val">Rs @m.Revenue.ToString("N0")</div>
+                                    <div class="bar-label">@m.Market</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="muted">No completed orders in this period.</p>
+                    }
+                </div>
+
+                <div class="card card-pad mt-3 reveal">
+                    <div class="section-kicker">Orders in period</div>
+                    <div class="table-wrap" style="border:none; box-shadow:none;">
+                        <table class="table" style="min-width:0;">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Farmer</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var o in Model.Orders)
+                                {
+                                    var cls = o.Status == OrderStatus.Completed ? "pill-completed" : "pill-placed";
+                                    <tr>
+                                        <td>@o.OrderNumber</td>
+                                        <td>@(o.Farmer?.StallName ?? o.Farmer?.FullName)</td>
+                                        <td>@o.Customer?.FullName</td>
+                                        <td>Rs @o.TotalAmount.ToString("N0")</td>
+                                        <td><span class="pill @cls">@o.Status</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card card-pad reveal">
+                    <div class="section-kicker">Most active farmers</div>
+                    <h3 style="font-size:1.45rem;">Leaderboard</h3>
+                    @if (Model.MostActiveFarmers.Any())
+                    {
+                        @foreach (var f in Model.MostActiveFarmers)
+                        {
+                            <div class="d-flex justify-between align-center" style="padding:11px 0; border-bottom:1px dashed rgba(27,67,50,.12);">
+                                <div>
+                                    <strong style="color: var(--forest-900);">@(string.IsNullOrEmpty(f.StallName) ? f.Name : f.StallName)</strong><br />
+                                    <span class="muted" style="font-size:.84rem;">@f.OrderCount order(s)</span>
+                                </div>
+                                <strong class="text-forest">Rs @f.Revenue.ToString("N0")</strong>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="muted mb-0">No activity in this period.</p>
+                    }
+                </div>
+
+                <div class="card card-pad mt-3 reveal">
+                    <div class="section-kicker">Best sellers</div>
+                    <h3 style="font-size:1.45rem;">Top produce</h3>
+                    @if (Model.TopProducts.Any())
+                    {
+                        @foreach (var t in Model.TopProducts)
+                        {
+                            <div class="d-flex justify-between" style="padding:10px 0; border-bottom:1px dashed rgba(27,67,50,.12);">
+                                <strong style="font-size:.95rem;">@t.Name</strong>
+                                <span class="muted">@t.UnitsSold sold · Rs @t.Revenue.ToString("N0")</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="muted mb-0">No sales data in this period.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

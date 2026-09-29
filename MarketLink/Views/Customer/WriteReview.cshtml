@@ -1,0 +1,73 @@
+@model ReviewFormViewModel
+@{
+    ViewData["Title"] = "Write a review";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a asp-controller="PreOrder" asp-action="Orders">My orders</a> <span>›</span> <span>Review</span>
+        </div>
+        <h1>Rate the harvest</h1>
+        <p>@Model.ProductName</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container-narrow">
+        <div class="form-card reveal">
+            <form asp-action="WriteReview" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ProductId" />
+                <input type="hidden" asp-for="OrderId" />
+                <input type="hidden" asp-for="ProductName" />
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <div class="form-group text-center">
+                    <label class="form-label">Your rating</label>
+                    <div class="d-flex gap-1" style="justify-content:center; font-size:2.2rem; color: var(--gold-400); cursor:pointer;" id="starPicker">
+                        @for (var i = 1; i <= 5; i++)
+                        {
+                            <span data-star="@i" class="star-pick @(i <= Model.Rating ? "" : "dim")" style="transition: transform .15s;">★</span>
+                        }
+                    </div>
+                    <input type="hidden" asp-for="Rating" id="ratingInput" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="Comment"></label>
+                    <textarea class="form-control" asp-for="Comment" rows="5" placeholder="How was the flavour, freshness and the pickup experience?"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-gold btn-lg">Publish review</button>
+                <a class="btn btn-ghost" asp-action="Reviews">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            var picker = document.getElementById("starPicker");
+            var input = document.getElementById("ratingInput");
+            if (!picker) return;
+            picker.querySelectorAll(".star-pick").forEach(function (star) {
+                star.addEventListener("click", function () {
+                    var val = parseInt(star.dataset.star, 10);
+                    input.value = val;
+                    picker.querySelectorAll(".star-pick").forEach(function (s) {
+                        s.classList.toggle("dim", parseInt(s.dataset.star, 10) > val);
+                        s.style.transform = s === star ? "scale(1.25)" : "scale(1)";
+                    });
+                });
+                star.addEventListener("mouseenter", function () {
+                    var val = parseInt(star.dataset.star, 10);
+                    picker.querySelectorAll(".star-pick").forEach(function (s) {
+                        s.classList.toggle("dim", parseInt(s.dataset.star, 10) > val);
+                    });
+                });
+            });
+        })();
+    </script>
+}

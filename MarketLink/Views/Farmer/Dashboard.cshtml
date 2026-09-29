@@ -1,0 +1,193 @@
+@model FarmerDashboardViewModel
+@{
+    ViewData["Title"] = "Farmer dashboard";
+    var pendingApproval = ViewBag.PendingApproval == true;
+    var maxRevenue = Model.RevenueByDay.Any() ? Math.Max(Model.RevenueByDay.Max(), 1) : 1;
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a> <span>›</span> <span>Farmer dashboard</span></div>
+        <h1>The grower's desk 🌾</h1>
+        <p>Your stall at a glance — orders, stock and takings.</p>
+    </div>
+</header>
+
+@if (pendingApproval)
+{
+    <section class="section-tight">
+        <div class="container">
+            <div class="flash flash-info">
+                <span class="flash-icon">⏳</span>
+                <div>
+                    <strong>Your stall is awaiting approval.</strong><br />
+                    The platform office is reviewing your application. You will receive a notification once your stall goes live —
+                    in the meantime you can complete your profile.
+                </div>
+            </div>
+        </div>
+    </section>
+}
+else
+{
+    <section class="section-tight">
+        <div class="container">
+            <div class="grid grid-4 mb-4">
+                <div class="stat-card reveal">
+                    <div class="stat-label">Total orders</div>
+                    <div class="stat-value">@Model.TotalOrders</div>
+                    <div class="stat-delta">Lifetime reservations</div>
+                </div>
+                <div class="stat-card reveal gold">
+                    <div class="stat-label">Pending orders</div>
+                    <div class="stat-value">@Model.PendingOrders</div>
+                    <a asp-action="Orders" asp-route-status="Placed" class="muted" style="font-size:.85rem;">Review them →</a>
+                </div>
+                <div class="stat-card reveal">
+                    <div class="stat-label">Revenue (completed)</div>
+                    <div class="stat-value">Rs @Model.Revenue.ToString("N0")</div>
+                    <div class="stat-delta">@Model.CompletedOrders completed</div>
+                </div>
+                <div class="stat-card reveal">
+                    <div class="stat-label">Stall rating</div>
+                    <div class="stat-value">@(Model.AverageRating.ToString("0.0")) ★</div>
+                    <a asp-action="Reviews" class="muted" style="font-size:.85rem;">Read reviews →</a>
+                </div>
+            </div>
+
+            <div class="grid" style="grid-template-columns: 1.5fr 1fr; gap:32px; align-items:start;">
+                <div>
+                    <div class="card card-pad reveal">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <div class="section-kicker">Takings</div>
+                                <h2 style="font-size:1.65rem;">Revenue · last 7 days</h2>
+                            </div>
+                            <span class="pill pill-live">@Model.ProductCount listings</span>
+                        </div>
+                        <div class="bar-chart mt-3" style="margin-bottom:30px;">
+                            @{
+                                var dayLabels = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+                            }
+                            @for (var i = 0; i < Model.RevenueByDay.Count; i++)
+                            {
+                                var pct = (int)Math.Max(4, Math.Round(Model.RevenueByDay[i] / maxRevenue * 100));
+                                var isHot = Model.RevenueByDay[i] == maxRevenue && maxRevenue > 1;
+                                <div class="bar @(isHot ? "hot" : "")" style="height:@pct%;">
+                                    <div class="bar-val">Rs @Model.RevenueByDay[i].ToString("N0")</div>
+                                    <div class="bar-label">@DateTime.Today.AddDays(-(6 - i)).ToString("ddd")</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card card-pad mt-3 reveal">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <div class="section-kicker">Incoming</div>
+                                <h2 style="font-size:1.55rem;">Recent pre-orders</h2>
+                            </div>
+                            <a class="btn btn-forest btn-sm" asp-action="Orders">Manage all orders</a>
+                        </div>
+
+                        @if (Model.RecentOrders.Any())
+                        {
+                            <div class="table-wrap mt-2" style="border:none; box-shadow:none;">
+                                <table class="table" style="min-width:0;">
+                                    <thead>
+                                        <tr>
+                                            <th>Order</th>
+                                            <th>Customer</th>
+                                            <th>Pickup</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var o in Model.RecentOrders)
+                                        {
+                                            var cls = o.Status switch
+                                            {
+                                                OrderStatus.Placed => "pill-placed",
+                                                OrderStatus.Accepted => "pill-accepted",
+                                                OrderStatus.ReadyForPickup => "pill-ready",
+                                                OrderStatus.Completed => "pill-completed",
+                                                OrderStatus.Declined => "pill-declined",
+                                                _ => "pill-cancelled"
+                                            };
+                                            <tr>
+                                                <td><strong style="color:var(--forest-800);">@o.OrderNumber</strong></td>
+                                                <td>@o.Customer?.FullName</td>
+                                                <td>@o.PickupDate.ToString("d MMM") · @o.PickupWindow</td>
+                                                <td><strong>Rs @o.TotalAmount.ToString("N0")</strong></td>
+                                                <td><span class="pill @cls">@o.Status</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="muted">No pre-orders yet — share your stall to spread the word.</p>
+                        }
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card card-pad reveal">
+                        <div class="section-kicker">Best sellers</div>
+                        <h3 style="font-size:1.45rem;">Top produce</h3>
+                        @if (Model.TopProducts.Any())
+                        {
+                            @foreach (var t in Model.TopProducts)
+                            {
+                                var pct = (int)Math.Round((double)t.UnitsSold / Math.Max(Model.TopProducts.First().UnitsSold, 1) * 100);
+                                <div style="padding:11px 0; border-bottom:1px dashed rgba(27,67,50,.12);">
+                                    <div class="d-flex justify-between">
+                                        <strong style="font-size:.95rem;">@t.Name</strong>
+                                        <span class="muted" style="font-size:.86rem;">@t.UnitsSold sold · Rs @t.Revenue.ToString("N0")</span>
+                                    </div>
+                                    <div class="progress-track mt-1">
+                                        <div class="progress-fill" style="width:@pct%;"></div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="muted mb-0">Sales data will appear after your first orders.</p>
+                        }
+                    </div>
+
+                    <div class="card card-pad mt-3 reveal">
+                        <div class="section-kicker">Stock watch</div>
+                        <h3 style="font-size:1.45rem;">Needs attention</h3>
+                        <div class="d-flex justify-between" style="padding:10px 0; border-bottom:1px dashed rgba(27,67,50,.12);">
+                            <span class="muted">Active listings</span>
+                            <strong>@Model.ProductCount</strong>
+                        </div>
+                        <div class="d-flex justify-between" style="padding:10px 0; border-bottom:1px dashed rgba(27,67,50,.12);">
+                            <span class="muted">Low stock (≤ 5)</span>
+                            <strong class="@(Model.LowStockCount > 0 ? "text-gold" : "")">@Model.LowStockCount</strong>
+                        </div>
+                        <div class="d-flex gap-2 mt-3 flex-wrap">
+                            <a class="btn btn-gold btn-sm" asp-action="CreateProduct">+ Add produce</a>
+                            <form asp-action="ResetWeeklyStock" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-leaf btn-sm">🔄 Reset weekly stock</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card card-pad mt-3 reveal">
+                        <div class="section-kicker">Stall</div>
+                        <h3 style="font-size:1.45rem;">Profile &amp; pickup</h3>
+                        <p class="muted">Keep your story, markets and pickup windows up to date.</p>
+                        <a class="btn btn-ghost btn-sm" asp-controller="Account" asp-action="Profile">Edit stall profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}

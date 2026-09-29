@@ -1,0 +1,50 @@
+@model Product
+<div class="card product-card reveal">
+    <div class="product-media">
+        @if (Model.IsSoldOut || Model.StockQuantity == 0)
+        {
+            <span class="ribbon ribbon-sold">Sold out</span>
+        }
+        else if (Model.StockQuantity <= 5)
+        {
+            <span class="ribbon ribbon-low">Only @Model.StockQuantity left</span>
+        }
+        else if (Model.IsRecurringWeekly)
+        {
+            <span class="ribbon ribbon-organic">Weekly harvest</span>
+        }
+        else
+        {
+            <span class="ribbon ribbon-new">Just harvested</span>
+        }
+        <img src="@Model.ImageUrl" alt="@Model.Name" data-fallback="@Model.Name" loading="lazy" />
+    </div>
+    <div class="product-body">
+        <div class="product-cat">@Model.Category?.Name</div>
+        <h3 class="product-title">
+            <a asp-controller="Marketplace" asp-action="Details" asp-route-id="@Model.Id">@Model.Name</a>
+        </h3>
+        <div class="product-farmer">
+            by <a asp-controller="Marketplace" asp-action="FarmerProfile" asp-route-id="@Model.FarmerId">@(Model.Farmer?.StallName ?? Model.Farmer?.FullName)</a>
+        </div>
+        <div class="product-foot">
+            <div>
+                <div class="price">Rs @Model.Price.ToString("N0") <small>/ @Model.Unit</small></div>
+            </div>
+            @if (!Model.IsSoldOut && Model.StockQuantity > 0)
+            {
+                <form asp-controller="PreOrder" asp-action="AddToCart" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
+                    <button type="submit" class="btn btn-leaf btn-sm">+ Basket</button>
+                </form>
+            }
+            else
+            {
+                <span class="pill pill-cancelled">Sold out</span>
+            }
+        </div>
+    </div>
+</div>

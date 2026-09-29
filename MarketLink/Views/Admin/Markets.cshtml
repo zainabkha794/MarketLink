@@ -1,0 +1,75 @@
+@model List<Market>
+@{
+    ViewData["Title"] = "Manage markets";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Markets</span></div>
+        <h1>Farmers markets</h1>
+        <p>Add, edit or retire market locations with map coordinates.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="d-flex justify-between align-center mb-3">
+            <div class="muted">@Model.Count market(s) on the map</div>
+            <a class="btn btn-gold" asp-action="CreateMarket">+ Add market</a>
+        </div>
+
+        <div class="table-wrap reveal">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Market</th>
+                        <th>Days</th>
+                        <th>Hours</th>
+                        <th>Coordinates</th>
+                        <th>Growers</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong style="color: var(--forest-900); font-family: var(--font-display);">@m.Name</strong><br />
+                                <span class="muted" style="font-size:.82rem;">@m.Address, @m.City</span>
+                            </td>
+                            <td>@m.OperatingDays</td>
+                            <td>@m.OpenTime.ToString(@"hh\:mm") – @m.CloseTime.ToString(@"hh\:mm")</td>
+                            <td class="muted" style="font-size:.82rem;">@m.Latitude.ToString("0.0000"), @m.Longitude.ToString("0.0000")</td>
+                            <td>@m.FarmerLinks.Count</td>
+                            <td>
+                                @if (m.IsActive)
+                                {
+                                    <span class="pill pill-accepted">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="pill pill-cancelled">Retired</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a class="btn btn-ghost btn-sm" asp-action="EditMarket" asp-route-id="@m.Id">Edit</a>
+                                    @if (m.IsActive)
+                                    {
+                                        <form asp-action="DeleteMarket" method="post" onsubmit="return confirm('Retire this market?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@m.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">Retire</button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

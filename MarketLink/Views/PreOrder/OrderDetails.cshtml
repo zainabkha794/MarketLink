@@ -1,0 +1,219 @@
+@model OrderDetailsViewModel
+@{
+    ViewData["Title"] = $"Order {Model.Order.OrderNumber}";
+    var o = Model.Order;
+    var steps = new[] { "Placed", "Accepted", "Ready for pickup", "Completed" };
+    var currentIdx = o.Status switch
+    {
+        OrderStatus.Placed => 0,
+        OrderStatus.Accepted => 1,
+        OrderStatus.ReadyForPickup => 2,
+        OrderStatus.Completed => 3,
+        _ => -1
+    };
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a asp-controller="PreOrder" asp-action="Orders">My orders</a> <span>›</span> <span>@o.OrderNumber</span>
+        </div>
+        <h1>Order @o.OrderNumber</h1>
+        <p>@(o.Farmer?.StallName ?? o.Farmer?.FullName) · pickup @o.PickupDate.ToString("dddd, d MMMM")</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="grid" style="grid-template-columns: 1.55fr 1fr; gap:32px; align-items:start;">
+            <div>
+                <div class="card card-pad reveal">
+                    <div class="d-flex justify-between align-center flex-wrap gap-2">
+                        <div>
+                            <div class="section-kicker">Status</div>
+                            @{
+                                var cls = o.Status switch
+                                {
+                                    OrderStatus.Placed => "pill-placed",
+                                    OrderStatus.Accepted => "pill-accepted",
+                                    OrderStatus.ReadyForPickup => "pill-ready",
+                                    OrderStatus.Completed => "pill-completed",
+                                    OrderStatus.Declined => "pill-declined",
+                                    _ => "pill-cancelled"
+                                };
+                            }
+                            <span class="pill @cls" style="font-size:.85rem;">@o.Status</span>
+                        </div>
+                        <div class="muted" style="font-size:.9rem;">
+                            Placed @o.OrderDate.ToString("d MMM yyyy, HH:mm")
+                            @if (o.StatusUpdatedAt.HasValue)
+                            {
+                                <span> · updated @o.StatusUpdatedAt.Value.ToString("d MMM HH:mm")</span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (o.Status is OrderStatus.Placed or OrderStatus.Accepted or OrderStatus.ReadyForPickup or OrderStatus.Completed)
+                    {
+                        <div class="timeline">
+                            @for (var i = 0; i < steps.Length; i++)
+                            {
+                                var state = i < currentIdx ? "done" : (i == currentIdx ? "current" : "");
+                                <div class="timeline-step @state">
+                                    <div class="dot"></div>
+                                    <div class="t-label">@steps[i]</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flash flash-error mt-2">
+                            <span class="flash-icon">🍂</span>
+                            <div>This order was @o.Status.ToString().ToLower().</div>
+                        </div>
+                    }
+                </div>
+
+                <div class="card card-pad mt-3 reveal">
+                    <div class="section-kicker">Basket</div>
+                    <div class="table-wrap" style="border:none; box-shadow:none;">
+                        <table class="table" style="min-width:0;">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th style="text-align:right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in o.Items)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong style="color: var(--forest-900);">@item.ProductName</strong><br />
+                                            <span class="muted" style="font-size:.84rem;">per @item.Unit</span>
+                                        </td>
+                                        <td>Rs @item.UnitPrice.ToString("N0")</td>
+                                        <td>
+                                            @if (Model.CanModify)
+                                            {
+                                                <form asp-action="UpdateOrderItems" method="post" class="d-inline-flex gap-1 align-center">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@o.Id" />
+                                                    <input type="hidden" name="itemIds" value="@item.Id" />
+                                                    <input class="form-control" style="width:80px;" type="number" name="quantities" value="@item.Quantity" min="1" />
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                @item.Quantity
+                                            }
+                                        </td>
+                                        <td style="text-align:right;"><strong>Rs @item.LineTotal.ToString("N0")</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (Model.CanModify)
+                    {
+                        <div class="mt-2 d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-forest btn-sm" onclick="this.closest('.card').querySelector('form') && this.closest('.card').querySelectorAll('form').forEach(f => f.submit());">Save quantity changes</button>
+                            <span class="muted" style="font-size:.85rem; align-self:center;">Modifications close @o.Farmer?.OrderCutoffHours hours before pickup.</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div>
+                <div class="card card-pad reveal">
+                    <div class="section-kicker">Pickup details</div>
+                    <div class="meta-list">
+                        <div class="meta-item">
+                            <div class="mi-icon">🌾</div>
+                            <div>
+                                <div class="mi-label">Grower</div>
+                                <a asp-controller="Marketplace" asp-action="FarmerProfile" asp-route-id="@o.FarmerId"><strong>@(o.Farmer?.StallName ?? o.Farmer?.FullName)</strong></a>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="mi-icon">📅</div>
+                            <div>
+                                <div class="mi-label">Pickup day</div>
+                                @o.PickupDate.ToString("dddd, d MMMM yyyy")
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="mi-icon">🕰</div>
+                            <div>
+                                <div class="mi-label">Window</div>
+                                @o.PickupWindow
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="mi-icon">💰</div>
+                            <div>
+                                <div class="mi-label">Payment</div>
+                                Rs @o.TotalAmount.ToString("N0") — settled at the stall
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(o.CustomerNote))
+                    {
+                        <div class="review-response">
+                            <div class="who">Your note</div>
+                            @o.CustomerNote
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(o.FarmerNote))
+                    {
+                        <div class="review-response mt-2">
+                            <div class="who">Grower's note</div>
+                            @o.FarmerNote
+                        </div>
+                    }
+
+                    <div class="mt-3 d-flex gap-2 flex-wrap">
+                        @if (Model.CanModify)
+                        {
+                            <form asp-action="CancelOrder" method="post" onsubmit="return confirm('Cancel this pre-order?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@o.Id" />
+                                <button type="submit" class="btn btn-danger">Cancel order</button>
+                            </form>
+                            <a class="btn btn-ghost" asp-controller="Marketplace" asp-action="Index">Add more items</a>
+                        }
+                        else if (o.Status == OrderStatus.Completed)
+                        {
+                            <a class="btn btn-gold" asp-action="Reorder" asp-route-id="@o.Id"
+                               onclick="event.preventDefault(); this.closest('div').querySelector('form').submit();">Reorder these items</a>
+                            <form asp-action="Reorder" method="post" style="display:none;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@o.Id" />
+                            </form>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.CanReview)
+                {
+                    <div class="card card-pad mt-3 reveal">
+                        <div class="section-kicker">Share your thoughts</div>
+                        <h3 style="font-size:1.35rem;">Rate the produce</h3>
+                        <p class="muted">Reviews help other market people and your growers.</p>
+                        @foreach (var item in o.Items.DistinctBy(i => i.ProductId))
+                        {
+                            <a class="btn btn-outline-gold btn-sm mb-1" style="width:100%; justify-content:flex-start;"
+                               asp-controller="Customer" asp-action="WriteReview" asp-route-productId="@item.ProductId" asp-route-orderId="@o.Id">
+                                ★ Review @item.ProductName
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

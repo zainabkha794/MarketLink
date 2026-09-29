@@ -1,0 +1,78 @@
+@model List<Favorite>
+@{
+    ViewData["Title"] = "Favourites";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Customer" asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Favourites</span></div>
+        <h1>Your favourites</h1>
+        <p>Saved produce and growers — with restock alerts when items return.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-art">♡</div>
+                <h3>Nothing saved yet</h3>
+                <p class="muted">Tap the heart on any product or grower to keep them close.</p>
+                <a class="btn btn-gold" asp-controller="Marketplace" asp-action="Index">Find something lovely</a>
+            </div>
+        }
+        else
+        {
+            <h2 class="mb-2">Products</h2>
+            var products = Model.Where(f => f.Product != null).ToList();
+            var farmers = Model.Where(f => f.Product == null && f.Farmer != null).ToList();
+            @if (products.Any())
+            {
+                <div class="grid grid-4 product-grid mb-4">
+                    @foreach (var f in products)
+                    {
+                        <div style="position:relative;">
+                            <partial name="_ProductCard" model="f.Product" />
+                            <form asp-action="ToggleFavorite" method="post" style="position:absolute; bottom:12px; right:12px; z-index:5;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@f.Product!.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm">Remove ♡</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+
+            <h2 class="mb-2">Growers</h2>
+            @if (farmers.Any())
+            {
+                <div class="grid grid-3">
+                    @foreach (var f in farmers)
+                    {
+                        <div class="card card-pad reveal d-flex justify-between align-center">
+                            <a asp-controller="Marketplace" asp-action="FarmerProfile" asp-route-id="@f.Farmer!.Id">
+                                <strong style="font-family:var(--font-display); font-size:1.15rem; color: var(--forest-900);">
+                                    @(f.Farmer.StallName ?? f.Farmer.FullName)
+                                </strong>
+                            </a>
+                            <form asp-action="ToggleFavorite" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="farmerId" value="@f.Farmer!.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+            else if (!products.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-art">🌾</div>
+                    <h3>No growers saved</h3>
+                    <p class="muted">Follow your favourite stalls for quick access.</p>
+                </div>
+            }
+        }
+    </div>
+</section>

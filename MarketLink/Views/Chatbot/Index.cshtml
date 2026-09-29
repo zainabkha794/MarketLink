@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Ask the Garden";
+}
+
+<header class="page-hero" style="padding-bottom:40px;">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a> <span>›</span> <span>Ask the Garden</span></div>
+        <h1>Ask the Garden 🌿</h1>
+        <p>Your market assistant — produce, market days, pickup windows and order help.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container-narrow">
+        <div class="chat-shell reveal">
+            <div class="chat-head">
+                <div class="bot-avatar">🌿</div>
+                <div>
+                    <h2>The Garden Assistant</h2>
+                    <div class="status">Online · answers from live market data</div>
+                </div>
+            </div>
+
+            <div class="chat-body" id="chatBody">
+                <div class="chat-msg bot">
+                    Hello! I am the MarketLink garden assistant. Ask me about produce, market days, pickup windows or your orders — I answer from live platform data.
+                    <div class="chat-time">now</div>
+                </div>
+            </div>
+
+            <div class="chat-suggestions">
+                <button type="button" class="chat-chip">What markets are open?</button>
+                <button type="button" class="chat-chip">Do you have tomatoes?</button>
+                <button type="button" class="chat-chip">How do pre-orders work?</button>
+                <button type="button" class="chat-chip">Where is my order?</button>
+                <button type="button" class="chat-chip">How does payment work?</button>
+            </div>
+
+            <form class="chat-input" id="chatForm">
+                @Html.AntiForgeryToken()
+                <input id="chatInput" type="text" placeholder="Ask anything about the market…" autocomplete="off" />
+                <button type="submit" class="btn btn-gold">Send</button>
+            </form>
+        </div>
+    </div>
+</section>

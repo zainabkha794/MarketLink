@@ -1,0 +1,65 @@
+@model List<Market>
+@{
+    ViewData["Title"] = "Markets";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a> <span>›</span> <span>Markets</span></div>
+        <h1>Farmers markets &amp; pickup points</h1>
+        <p>Find the market that suits your week — every stall is mapped with directions.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="map-frame reveal" style="height: 420px; margin-top:-30px;">
+            <div class="map-fallback">
+                <div>
+                    <div style="font-size:2.6rem;">🗺</div>
+                    <strong>Market map</strong><br />
+                    @Model.Count markets across the city
+                </div>
+            </div>
+            <div id="marketsMap" style="height:420px;"></div>
+        </div>
+    </div>
+</section>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="grid grid-3">
+            @foreach (var m in Model)
+            {
+                <a class="market-card reveal" asp-action="Details" asp-route-id="@m.Id">
+                    <img src="@m.ImageUrl" alt="@m.Name" onerror="this.style.display='none'" />
+                    <div class="market-veil"></div>
+                    <div class="market-content">
+                        <h3>@m.Name</h3>
+                        <div class="market-days">
+                            @foreach (var day in m.OperatingDays.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <span class="day-pill">@day.Trim()</span>
+                            }
+                        </div>
+                        <div style="font-size:.88rem; color: rgba(251,247,236,.78); margin-top:10px;">
+                            @m.Address · @m.OpenTime.ToString(@"hh\:mm") – @m.CloseTime.ToString(@"hh\:mm")
+                        </div>
+                        <div class="d-flex gap-1 mt-2">
+                            <span class="pill pill-gold">@m.FarmerLinks.Count growers</span>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            var pts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(m => new { lat = m.Latitude, lng = m.Longitude, title = m.Name, subtitle = m.Address })));
+            if (window.initMap) window.initMap("marketsMap", pts, 11);
+        })();
+    </script>
+}

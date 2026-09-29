@@ -1,0 +1,65 @@
+@model List<Review>
+@{
+    ViewData["Title"] = "Reviews";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Reviews</span></div>
+        <h1>What customers say</h1>
+        <p>Respond to reviews to thank customers and build trust.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container-narrow">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-art">★</div>
+                <h3>No reviews yet</h3>
+                <p class="muted">Customers can review produce after their orders are completed.</p>
+            </div>
+        }
+        else
+        {
+            <div class="card card-pad reveal">
+                @foreach (var r in Model)
+                {
+                    <div class="review-item">
+                        <div class="d-flex justify-between align-center">
+                            <strong style="color: var(--forest-900);">@r.Customer?.FullName</strong>
+                            <span class="stars">
+                                @for (var i = 1; i <= 5; i++) { <span class="@(i <= r.Rating ? "" : "dim")">★</span> }
+                            </span>
+                        </div>
+                        <div class="muted" style="font-size:.84rem;">@r.Product?.Name · @r.ReviewDate.ToString("d MMMM yyyy")</div>
+                        @if (!string.IsNullOrEmpty(r.Comment))
+                        {
+                            <p class="mt-1" style="font-style:italic;">“@r.Comment”</p>
+                        }
+
+                        @if (!string.IsNullOrEmpty(r.FarmerResponse))
+                        {
+                            <div class="review-response">
+                                <div class="who">Your response · @r.ResponseDate?.ToString("d MMM yyyy")</div>
+                                @r.FarmerResponse
+                            </div>
+                        }
+                        else
+                        {
+                            <form asp-action="RespondToReview" method="post" class="mt-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@r.Id" />
+                                <div class="d-flex gap-1">
+                                    <input class="form-control" name="response" placeholder="Write a kind response…" required />
+                                    <button type="submit" class="btn btn-forest btn-sm">Respond</button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

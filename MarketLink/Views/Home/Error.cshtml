@@ -1,0 +1,22 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Something went wrong";
+}
+
+<section class="section">
+    <div class="container">
+        <div class="empty-state">
+            <div class="empty-art">🍂</div>
+            <h2>Oops — a market mishap</h2>
+            <p class="muted">@(Model?.Message ?? "An unexpected error occurred while processing your request.")</p>
+            @if (Model?.ShowRequestId == true)
+            {
+                <p class="muted" style="font-size:.85rem;">Request ID: <code>@Model.RequestId</code></p>
+            }
+            <div class="mt-3">
+                <a class="btn btn-forest" asp-controller="Home" asp-action="Index">Back to the market</a>
+                <a class="btn btn-ghost" asp-controller="Marketplace" asp-action="Index">Browse produce</a>
+            </div>
+        </div>
+    </div>
+</section>

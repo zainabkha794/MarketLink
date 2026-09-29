@@ -1,0 +1,89 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Reserve for pickup";
+    var slots = Model.PickupSlots.GroupBy(s => s.Label).Select(g => g.First()).ToList();
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a asp-controller="PreOrder" asp-action="Cart">Basket</a> <span>›</span> <span>Reserve</span>
+        </div>
+        <h1>Choose your pickup</h1>
+        <p>One reservation per grower — pay in person when you collect.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="grid" style="grid-template-columns: 1.4fr 1fr; gap:32px; align-items:start;">
+            <div class="form-card reveal">
+                <form asp-action="Checkout" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" asp-for="PickupDate"></label>
+                            <input class="form-control" asp-for="PickupDate" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="PickupDate" class="field-validation-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" asp-for="PickupWindow"></label>
+                            <select class="form-select" asp-for="PickupWindow">
+                                <option value="">Choose a window…</option>
+                                @foreach (var slot in slots)
+                                {
+                                    <option value="@slot.Label">@slot.Label</option>
+                                }
+                            </select>
+                            <span asp-validation-for="PickupWindow" class="field-validation-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" asp-for="CustomerNote"></label>
+                        <textarea class="form-control" asp-for="CustomerNote" rows="3" placeholder="Anything the grower should know — ripeness preference, returning bottles…"></textarea>
+                    </div>
+
+                    <div class="flash flash-info">
+                        <span class="flash-icon">🧺</span>
+                        <div>
+                            <strong>Payment at pickup.</strong> No online payment is taken — bring cash or your usual method to the stall.
+                            You can modify or cancel before the grower's cut-off time.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-gold btn-lg mt-2">Place pre-order(s)</button>
+                    <a class="btn btn-ghost" asp-action="Cart">Back to basket</a>
+                </form>
+            </div>
+
+            <div class="card card-pad reveal" style="position:sticky; top:100px;">
+                <div class="section-kicker">Your baskets</div>
+                @foreach (var group in Model.Cart.Items.GroupBy(i => i.FarmerId))
+                {
+                    var farmer = group.First();
+                    <div style="padding:12px 0; border-bottom:1px dashed rgba(27,67,50,.14);">
+                        <strong style="font-family:var(--font-display);">@farmer.FarmerName</strong>
+                        @foreach (var item in group)
+                        {
+                            <div class="d-flex justify-between" style="font-size:.92rem; padding:4px 0;">
+                                <span class="muted">@item.Quantity × @item.Name</span>
+                                <span>Rs @item.LineTotal.ToString("N0")</span>
+                            </div>
+                        }
+                        <div class="d-flex justify-between mt-1">
+                            <strong>Subtotal</strong>
+                            <strong class="text-forest">Rs @group.Sum(i => i.LineTotal).ToString("N0")</strong>
+                        </div>
+                    </div>
+                }
+                <div class="d-flex justify-between mt-3" style="font-size:1.15rem;">
+                    <strong>Total</strong>
+                    <strong class="text-gold" style="font-family:var(--font-display); font-size:1.6rem;">Rs @Model.Cart.Subtotal.ToString("N0")</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

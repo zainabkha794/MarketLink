@@ -1,0 +1,102 @@
+@model MarketplaceFilterViewModel
+@{
+    ViewData["Title"] = "Marketplace";
+    var days = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a> <span>›</span> <span>Marketplace</span></div>
+        <h1>The weekly marketplace</h1>
+        <p>@Model.TotalCount listing@(Model.TotalCount == 1 ? "" : "s") from local growers — reserve now, pay at pickup.</p>
+    </div>
+</header>
+
+<div class="container">
+    <div class="filter-bar reveal">
+        <form method="get" class="filter-grid">
+            <div>
+                <label class="form-label">Search</label>
+                <input class="form-control" name="Query" value="@Model.Query" placeholder="Tomatoes, sourdough, a farm name…" />
+            </div>
+            <div>
+                <label class="form-label">Category</label>
+                <select class="form-select" name="Category">
+                    <option value="">All categories</option>
+                    @foreach (var c in Model.Categories)
+                    {
+                        <option value="@c.Name" selected="@(Model.Category == c.Name)">@c.Name</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Market</label>
+                <select class="form-select" name="MarketId">
+                    <option value="">All markets</option>
+                    @foreach (var m in Model.Markets)
+                    {
+                        <option value="@m.Id" selected="@(Model.MarketId == m.Id)">@m.Name</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Market day</label>
+                <select class="form-select" name="Day">
+                    <option value="">Any day</option>
+                    @foreach (var d in days)
+                    {
+                        <option value="@d" selected="@(Model.Day == d)">@d</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Sort by</label>
+                <select class="form-select" name="Sort">
+                    <option value="newest" selected="@(Model.Sort == "newest")">Newest first</option>
+                    <option value="price_asc" selected="@(Model.Sort == "price_asc")">Price · low to high</option>
+                    <option value="price_desc" selected="@(Model.Sort == "price_desc")">Price · high to low</option>
+                    <option value="name" selected="@(Model.Sort == "name")">Name A–Z</option>
+                    <option value="rating" selected="@(Model.Sort == "rating")">Highest rated</option>
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-forest w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<section class="section-tight">
+    <div class="container">
+        @if (!string.IsNullOrEmpty(Model.Query) || !string.IsNullOrEmpty(Model.Category) || Model.MarketId.HasValue || !string.IsNullOrEmpty(Model.Day))
+        {
+            <div class="d-flex justify-between align-center flex-wrap gap-2 mb-3">
+                <div class="muted">
+                    Showing <strong>@Model.TotalCount</strong> result(s)
+                    @if (!string.IsNullOrEmpty(Model.Query)) { <span> for “@Model.Query”</span> }
+                    @if (!string.IsNullOrEmpty(Model.Category)) { <span> in @Model.Category</span> }
+                </div>
+                <a class="btn btn-ghost btn-sm" asp-action="Index">Clear filters</a>
+            </div>
+        }
+
+        @if (Model.Products.Any())
+        {
+            <div class="grid grid-4 product-grid">
+                @foreach (var p in Model.Products)
+                {
+                    <partial name="_ProductCard" model="p" />
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-art">🧺</div>
+                <h3>The basket is empty</h3>
+                <p class="muted">No produce matched your filters — try widening your search or browse the full harvest.</p>
+                <a class="btn btn-forest" asp-action="Index">Browse everything</a>
+            </div>
+        }
+    </div>
+</section>

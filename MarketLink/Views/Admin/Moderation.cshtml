@@ -1,0 +1,112 @@
+@{
+    ViewData["Title"] = "Content moderation";
+    var products = ViewBag.Products as List<Product> ?? new List<Product>();
+    var reviews = ViewBag.Reviews as List<Review> ?? new List<Review>();
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Moderation</span></div>
+        <h1>Content moderation</h1>
+        <p>Hide listings or reviews that violate platform guidelines.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <h2 class="mb-2">Product listings</h2>
+        <div class="table-wrap reveal mb-4">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Listing</th>
+                        <th>Farmer</th>
+                        <th>Price</th>
+                        <th>Visibility</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in products)
+                    {
+                        <tr>
+                            <td>
+                                <strong style="color: var(--forest-900);">@p.Name</strong><br />
+                                <span class="muted" style="font-size:.82rem;">@p.Category?.Name · added @p.CreatedAt.ToString("d MMM")</span>
+                            </td>
+                            <td>@(p.Farmer?.StallName ?? p.Farmer?.FullName)</td>
+                            <td>Rs @p.Price.ToString("N0")</td>
+                            <td>
+                                @if (p.IsVisible)
+                                {
+                                    <span class="pill pill-accepted">Visible</span>
+                                }
+                                else
+                                {
+                                    <span class="pill pill-warn">Hidden</span>
+                                }
+                            </td>
+                            <td>
+                                <form asp-action="ToggleProductVisibility" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@p.Id" />
+                                    <button type="submit" class="btn @(p.IsVisible ? "btn-danger" : "btn-leaf") btn-sm">
+                                        @(p.IsVisible ? "Hide listing" : "Restore")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="mb-2">Customer reviews</h2>
+        <div class="table-wrap reveal">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Review</th>
+                        <th>Product</th>
+                        <th>Customer</th>
+                        <th>Rating</th>
+                        <th>Visibility</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in reviews)
+                    {
+                        <tr>
+                            <td style="max-width:320px;">
+                                <span class="muted">@(r.Comment != null && r.Comment.Length > 90 ? r.Comment.Substring(0, 90) + "…" : r.Comment ?? "—")</span>
+                            </td>
+                            <td>@r.Product?.Name</td>
+                            <td>@r.Customer?.FullName</td>
+                            <td><span class="stars">@for (var i = 1; i <= 5; i++) { <span class="@(i <= r.Rating ? "" : "dim")">★</span> }</span></td>
+                            <td>
+                                @if (r.IsVisible)
+                                {
+                                    <span class="pill pill-accepted">Visible</span>
+                                }
+                                else
+                                {
+                                    <span class="pill pill-warn">Hidden</span>
+                                }
+                            </td>
+                            <td>
+                                <form asp-action="ToggleReviewVisibility" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@r.Id" />
+                                    <button type="submit" class="btn @(r.IsVisible ? "btn-danger" : "btn-leaf") btn-sm">
+                                        @(r.IsVisible ? "Hide review" : "Restore")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

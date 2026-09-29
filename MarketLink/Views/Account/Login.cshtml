@@ -1,0 +1,62 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Sign in";
+}
+
+<div class="auth-shell">
+    <div class="auth-visual">
+        <div class="auth-img"></div>
+        <div class="auth-quote">
+            <blockquote>“To market, to market — knowing exactly what waits at the stall.”</blockquote>
+            <cite>The MarketLink way</cite>
+        </div>
+    </div>
+    <div class="auth-panel">
+        <div class="form-card">
+            <div class="section-kicker" style="justify-content:center;">Welcome back</div>
+            <h1 style="font-size:1.95rem;">Sign in to MarketLink</h1>
+            <p class="muted text-center mb-3">Your basket, orders and favourites are waiting.</p>
+
+            <form asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="Email"></label>
+                    <input class="form-control" asp-for="Email" placeholder="you@example.com" autocomplete="email" />
+                    <span asp-validation-for="Email" class="field-validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="Password"></label>
+                    <input class="form-control" asp-for="Password" placeholder="••••••••" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                </div>
+
+                <div class="form-group d-flex justify-between align-center">
+                    <label class="form-check">
+                        <input asp-for="RememberMe" /> Remember me
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-gold btn-block btn-lg">Sign in</button>
+            </form>
+
+            <div class="auth-divider">new to the market?</div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-ghost btn-block" asp-action="Register">Create customer account</a>
+                <a class="btn btn-forest btn-block" asp-action="RegisterFarmer">Open a stall</a>
+            </div>
+
+            <div class="auth-links mt-3">
+                <strong style="color: var(--forest-800);">Demo credentials</strong><br />
+                <span style="font-size:.86rem;">
+                    Admin · admin@marketlink.local / Admin@123<br />
+                    Farmer · farmer@marketlink.local / Farmer@123<br />
+                    Customer · customer@marketlink.local / Customer@123
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

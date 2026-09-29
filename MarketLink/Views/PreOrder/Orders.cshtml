@@ -1,0 +1,77 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "My orders";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Customer" asp-action="Dashboard">Dashboard</a> <span>›</span> <span>My orders</span></div>
+        <h1>My pre-orders</h1>
+        <p>Track every reservation — from placed to collected.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-art">📦</div>
+                <h3>No orders yet</h3>
+                <p class="muted">Your reserved baskets will appear here.</p>
+                <a class="btn btn-gold" asp-controller="Marketplace" asp-action="Index">Start browsing</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap reveal">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Grower</th>
+                            <th>Pickup</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong style="color: var(--forest-800);">@o.OrderNumber</strong><br />
+                                    <span class="muted" style="font-size:.82rem;">@o.OrderDate.ToString("d MMM yyyy")</span>
+                                </td>
+                                <td>@(o.Farmer?.StallName ?? o.Farmer?.FullName)</td>
+                                <td>
+                                    @o.PickupDate.ToString("ddd, d MMM")<br />
+                                    <span class="muted" style="font-size:.82rem;">@o.PickupWindow</span>
+                                </td>
+                                <td>@o.Items.Sum(i => i.Quantity)</td>
+                                <td><strong>Rs @o.TotalAmount.ToString("N0")</strong></td>
+                                <td>
+                                    @{
+                                        var cls = o.Status switch
+                                        {
+                                            OrderStatus.Placed => "pill-placed",
+                                            OrderStatus.Accepted => "pill-accepted",
+                                            OrderStatus.ReadyForPickup => "pill-ready",
+                                            OrderStatus.Completed => "pill-completed",
+                                            OrderStatus.Declined => "pill-declined",
+                                            _ => "pill-cancelled"
+                                        };
+                                    }
+                                    <span class="pill @cls">@o.Status</span>
+                                </td>
+                                <td><a class="btn btn-ghost btn-sm" asp-action="OrderDetails" asp-route-id="@o.Id">View</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>

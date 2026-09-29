@@ -1,0 +1,170 @@
+@{
+    ViewData["Title"] = "My dashboard";
+    var active = ViewBag.ActiveOrders as List<Order> ?? new List<Order>();
+    var past = ViewBag.PastOrders as List<Order> ?? new List<Order>();
+    var favorites = ViewBag.Favorites as List<Favorite> ?? new List<Favorite>();
+    var notifications = ViewBag.Notifications as List<Notification> ?? new List<Notification>();
+    var restock = ViewBag.RestockItems as List<Product> ?? new List<Product>();
+    var unread = (int)(ViewBag.UnreadCount ?? 0);
+    var userName = User.Identity?.Name ?? "Friend";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a> <span>›</span> <span>Dashboard</span></div>
+        <h1>Good day, @userName.Split(' ').First() 🌿</h1>
+        <p>Here is what is happening with your market basket.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="grid grid-4 mb-4">
+            <div class="stat-card reveal">
+                <div class="stat-label">Active orders</div>
+                <div class="stat-value">@active.Count</div>
+                <a asp-controller="PreOrder" asp-action="Orders" class="muted" style="font-size:.85rem;">Track them →</a>
+            </div>
+            <div class="stat-card reveal gold">
+                <div class="stat-label">Completed orders</div>
+                <div class="stat-value">@past.Count</div>
+                <a asp-controller="PreOrder" asp-action="Orders" class="muted" style="font-size:.85rem;">Order history →</a>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-label">Favourites</div>
+                <div class="stat-value">@favorites.Count</div>
+                <a asp-action="Favorites" class="muted" style="font-size:.85rem;">View saved →</a>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-label">Unread alerts</div>
+                <div class="stat-value">@unread</div>
+                <a asp-action="Notifications" class="muted" style="font-size:.85rem;">Open inbox →</a>
+            </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1.55fr 1fr; gap:32px; align-items:start;">
+            <div>
+                <div class="card card-pad reveal">
+                    <div class="d-flex justify-between align-center">
+                        <div>
+                            <div class="section-kicker">On the go</div>
+                            <h2 style="font-size:1.65rem;">Active pre-orders</h2>
+                        </div>
+                        <a class="btn btn-ghost btn-sm" asp-controller="Marketplace" asp-action="Index">+ New reservation</a>
+                    </div>
+
+                    @if (active.Any())
+                    {
+                        @foreach (var o in active)
+                        {
+                            var cls = o.Status switch
+                            {
+                                OrderStatus.Placed => "pill-placed",
+                                OrderStatus.Accepted => "pill-accepted",
+                                _ => "pill-ready"
+                            };
+                            <div class="d-flex justify-between align-center flex-wrap gap-2" style="padding:16px 0; border-bottom:1px dashed rgba(27,67,50,.13);">
+                                <div>
+                                    <strong style="color: var(--forest-900); font-family: var(--font-display); font-size:1.1rem;">@o.OrderNumber</strong>
+                                    <span class="pill @cls" style="margin-left:8px;">@o.Status</span><br />
+                                    <span class="muted" style="font-size:.88rem;">
+                                        @(o.Farmer?.StallName ?? o.Farmer?.FullName) ·
+                                        pickup @o.PickupDate.ToString("ddd, d MMM") · @o.PickupWindow
+                                    </span>
+                                </div>
+                                <div class="d-flex gap-1 align-center">
+                                    <strong>Rs @o.TotalAmount.ToString("N0")</strong>
+                                    <a class="btn btn-ghost btn-sm" asp-controller="PreOrder" asp-action="OrderDetails" asp-route-id="@o.Id">View</a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state" style="padding:36px 10px;">
+                            <div class="empty-art" style="width:86px;height:86px;font-size:2.2rem;">🧺</div>
+                            <h3>Nothing reserved yet</h3>
+                            <p class="muted">Browse this week's harvest and reserve your favourites.</p>
+                            <a class="btn btn-gold" asp-controller="Marketplace" asp-action="Index">Browse produce</a>
+                        </div>
+                    }
+                </div>
+
+                @if (restock.Any())
+                {
+                    <div class="card card-pad mt-3 reveal">
+                        <div class="section-kicker">Back in stock</div>
+                        <h2 style="font-size:1.55rem;">Your favourites are available ♡</h2>
+                        <div class="grid grid-2 gap-2 mt-2">
+                            @foreach (var p in restock)
+                            {
+                                <partial name="_ProductCard" model="p" />
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div>
+                <div class="card card-pad reveal">
+                    <div class="d-flex justify-between align-center">
+                        <div>
+                            <div class="section-kicker">Inbox</div>
+                            <h3 style="font-size:1.45rem;">Notifications</h3>
+                        </div>
+                        <a class="btn btn-ghost btn-sm" asp-action="Notifications">All</a>
+                    </div>
+                    @if (notifications.Any())
+                    {
+                        @foreach (var n in notifications)
+                        {
+                            <div style="padding:11px 0; border-bottom:1px dashed rgba(27,67,50,.12);">
+                                <div class="d-flex justify-between">
+                                    <strong style="font-size:.95rem; color: var(--forest-800);">@n.Title</strong>
+                                    @if (!n.IsRead) { <span class="pill pill-gold" style="font-size:.62rem; padding:2px 8px;">new</span> }
+                                </div>
+                                <div class="muted" style="font-size:.85rem;">@n.Message</div>
+                                <div class="muted" style="font-size:.74rem; margin-top:3px;">@n.CreatedAt.ToString("d MMM, HH:mm")</div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="muted mb-0">No notifications yet.</p>
+                    }
+                </div>
+
+                <div class="card card-pad mt-3 reveal">
+                    <div class="section-kicker">Saved</div>
+                    <h3 style="font-size:1.45rem;">Favourites</h3>
+                    @if (favorites.Any())
+                    {
+                        @foreach (var f in favorites.Take(5))
+                        {
+                            <div class="d-flex justify-between align-center" style="padding:9px 0; border-bottom:1px dashed rgba(27,67,50,.12);">
+                                <div>
+                                    @if (f.Product != null)
+                                    {
+                                        <a asp-controller="Marketplace" asp-action="Details" asp-route-id="@f.Product.Id"><strong>@f.Product.Name</strong></a>
+                                        <div class="muted" style="font-size:.82rem;">@(f.Product.Farmer?.StallName ?? f.Product.Farmer?.FullName)</div>
+                                    }
+                                    else if (f.Farmer != null)
+                                    {
+                                        <a asp-controller="Marketplace" asp-action="FarmerProfile" asp-route-id="@f.Farmer.Id"><strong>@(f.Farmer.StallName ?? f.Farmer.FullName)</strong></a>
+                                        <div class="muted" style="font-size:.82rem;">Grower</div>
+                                    }
+                                </div>
+                                <span class="text-gold">♡</span>
+                            </div>
+                        }
+                        <a class="btn btn-ghost btn-sm mt-2" asp-action="Favorites">Manage favourites</a>
+                    }
+                    else
+                    {
+                        <p class="muted mb-0">Save products and growers with the ♡ button.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

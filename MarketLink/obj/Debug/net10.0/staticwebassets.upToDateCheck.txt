@@ -1,0 +1,20 @@
+wwwroot\css\site.css
+wwwroot\images\about.jpg
+wwwroot\images\cat-bakery.jpg
+wwwroot\images\cat-dairy.jpg
+wwwroot\images\cat-flowers.jpg
+wwwroot\images\cat-fruits.jpg
+wwwroot\images\cat-grains.jpg
+wwwroot\images\cat-herbs.jpg
+wwwroot\images\cat-honey.jpg
+wwwroot\images\cat-vegetables.jpg
+wwwroot\images\hero.jpg
+wwwroot\images\market-clifton.svg
+wwwroot\images\market-oldtown.svg
+wwwroot\images\market-riverside.svg
+wwwroot\js\site.js
+C:\Users\MY PC\OneDrive\Documents\MarketLink\MarketLink\wwwroot\js\site.js
+C:\Users\MY PC\OneDrive\Documents\MarketLink\MarketLink\wwwroot\images\market-riverside.svg
+C:\Users\MY PC\OneDrive\Documents\MarketLink\MarketLink\wwwroot\images\market-oldtown.svg
+C:\Users\MY PC\OneDrive\Documents\MarketLink\MarketLink\wwwroot\images\market-clifton.svg
+C:\Users\MY PC\OneDrive\Documents\MarketLink\MarketLink\wwwroot\css\site.css

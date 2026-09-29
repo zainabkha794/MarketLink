@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Pre-order placed";
+    var count = (int)(ViewBag.OrderCount ?? 1);
+}
+
+<section class="section">
+    <div class="container">
+        <div class="empty-state" style="padding-top:40px;">
+            <div class="empty-art" style="background: linear-gradient(135deg, var(--gold-100), var(--mint-100));">🎉</div>
+            <div class="section-kicker" style="justify-content:center;">Reservation confirmed</div>
+            <h1 style="font-size:2.4rem;">Your basket@(count > 1 ? "s are" : " is") reserved!</h1>
+            <p class="muted" style="font-size:1.1rem; max-width:34em; margin: 12px auto 0;">
+                We sent the details to your growers. You will receive in-app alerts as each order is accepted and packed.
+                Payment is settled at the stall when you collect — see you at the market!
+            </p>
+
+            <div class="grid grid-3 mt-4" style="max-width:820px; margin-inline:auto;">
+                <div class="stat-card">
+                    <div class="stat-label">Orders placed</div>
+                    <div class="stat-value">@count</div>
+                    <div class="muted">One per grower</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-label">Payment</div>
+                    <div class="stat-value" style="font-size:1.55rem;">At pickup</div>
+                    <div class="muted">Settle at the stall</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Next step</div>
+                    <div class="stat-value" style="font-size:1.55rem;">Watch alerts</div>
+                    <div class="muted">Acceptance &amp; ready notices</div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2" style="justify-content:center; flex-wrap:wrap;">
+                <a class="btn btn-gold btn-lg" asp-action="Orders">Track my orders</a>
+                <a class="btn btn-ghost btn-lg" asp-controller="Marketplace" asp-action="Index">Continue browsing</a>
+            </div>
+        </div>
+    </div>
+</section>

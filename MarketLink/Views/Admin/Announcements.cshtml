@@ -1,0 +1,65 @@
+@model List<Announcement>
+@{
+    ViewData["Title"] = "Announcements";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Announcements</span></div>
+        <h1>Platform announcements</h1>
+        <p>Publish notices shown to the whole market community.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="grid" style="grid-template-columns: 1fr 1.3fr; gap:32px; align-items:start;">
+            <div class="form-card reveal">
+                <h3>Publish announcement</h3>
+                <form asp-action="SaveAnnouncement" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="0" />
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input class="form-control" name="title" required placeholder="e.g. Autumn Harvest Festival" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" name="message" rows="4" required placeholder="What should the community know?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-gold">Publish now</button>
+                </form>
+            </div>
+
+            <div>
+                @foreach (var a in Model)
+                {
+                    <div class="card card-pad mb-2 reveal">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <strong style="font-family: var(--font-display); font-size:1.15rem; color: var(--forest-900);">@a.Title</strong>
+                                <div class="muted" style="font-size:.84rem;">@a.CreatedAt.ToString("d MMMM yyyy")</div>
+                            </div>
+                            <div class="d-flex gap-1 align-center">
+                                @if (a.IsActive)
+                                {
+                                    <span class="pill pill-accepted">Live</span>
+                                }
+                                else
+                                {
+                                    <span class="pill pill-neutral">Hidden</span>
+                                }
+                                <form asp-action="ToggleAnnouncement" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@a.Id" />
+                                    <button type="submit" class="btn btn-ghost btn-sm">@(a.IsActive ? "Hide" : "Show")</button>
+                                </form>
+                            </div>
+                        </div>
+                        <p class="muted mt-2 mb-0">@a.Message</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

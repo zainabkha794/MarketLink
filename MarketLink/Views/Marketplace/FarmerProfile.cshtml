@@ -1,0 +1,162 @@
+@model User
+@{
+    ViewData["Title"] = Model.StallName ?? Model.FullName;
+    var products = ViewBag.Products as List<Product> ?? new List<Product>();
+    var reviews = ViewBag.Reviews as List<Review> ?? new List<Review>();
+    var avg = (double)ViewBag.AverageRating;
+    var markets = Model.MarketLinks?.Select(mf => mf.Market).Where(m => m != null).ToList() ?? new List<Market>();
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Home</a> <span>›</span>
+            <a asp-controller="Marketplace" asp-action="Index">Marketplace</a> <span>›</span>
+            <span>@(Model.StallName ?? Model.FullName)</span>
+        </div>
+        <h1>@(Model.StallName ?? Model.FullName)</h1>
+        <p>
+            <span class="stars" style="color: var(--gold-300);">
+                @for (var i = 1; i <= 5; i++) { <span class="@(i <= Math.Round(avg) ? "" : "dim")" style="color: inherit;">★</span> }
+            </span>
+            &nbsp;@avg.ToString("0.0") rating · @products.Count active listing(s)
+        </p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="grid grid-2" style="gap:36px; align-items:start;">
+            <div class="card card-pad reveal">
+                <div class="section-kicker">The story</div>
+                <p style="font-family: var(--font-display); font-size:1.22rem; font-style:italic; color: var(--ink-soft);">
+                    @(Model.Bio ?? "Bringing the harvest to market each week.")
+                </p>
+                <div class="meta-list">
+                    <div class="meta-item">
+                        <div class="mi-icon">👤</div>
+                        <div><div class="mi-label">Grower</div>@Model.FullName</div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Address))
+                    {
+                        <div class="meta-item">
+                            <div class="mi-icon">📍</div>
+                            <div><div class="mi-label">Address</div>@Model.Address</div>
+                        </div>
+                    }
+                    <div class="meta-item">
+                        <div class="mi-icon">🕰</div>
+                        <div><div class="mi-label">Order cut-off</div>@Model.OrderCutoffHours hours before pickup</div>
+                    </div>
+                </div>
+
+                @if (markets.Any())
+                {
+                    <h4 class="mt-3" style="letter-spacing:.14em; text-transform:uppercase; font-family: var(--font-body); font-size:.8rem; color: var(--muted);">Markets &amp; pickup</h4>
+                    @foreach (var m in markets)
+                    {
+                        <div class="d-flex justify-between align-center" style="padding:11px 0; border-bottom:1px dashed rgba(27,67,50,.12);">
+                            <div>
+                                <strong>@m.Name</strong><br />
+                                <span class="muted" style="font-size:.85rem;">
+                                    @m.OperatingDays · @m.OpenTime.ToString(@"hh\:mm")–@m.CloseTime.ToString(@"hh\:mm")
+                                    @(Model.MarketLinks?.FirstOrDefault(mf => mf.MarketId == m.Id)?.StallLocation != null
+                                        ? " · " + Model.MarketLinks.First(mf => mf.MarketId == m.Id).StallLocation : "")
+                                </span>
+                            </div>
+                            <a class="btn btn-ghost btn-sm" asp-controller="Markets" asp-action="Details" asp-route-id="@m.Id">Map</a>
+                        </div>
+                    }
+                }
+
+                <h4 class="mt-3" style="letter-spacing:.14em; text-transform:uppercase; font-family: var(--font-body); font-size:.8rem; color: var(--muted);">Pickup windows</h4>
+                <div class="market-days">
+                    @foreach (var slot in (Model.PickupSlots ?? new List<PickupSlot>()).Where(s => s.IsActive))
+                    {
+                        <span class="pill pill-live">@slot.Label</span>
+                    }
+                    @if (Model.PickupSlots == null || !Model.PickupSlots.Any(s => s.IsActive))
+                    {
+                        <span class="muted">Standard market hours.</span>
+                    }
+                </div>
+
+                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                {
+                    <div class="map-frame mt-3" style="height:280px;">
+                        <div class="map-fallback"><div>📍 Stall location on the market map</div></div>
+                        <div id="farmerMap" style="height:280px;"></div>
+                    </div>
+                }
+            </div>
+
+            <div>
+                <div class="section-kicker">This week's stock</div>
+                <h2 style="font-size:1.75rem;">From the stall</h2>
+                @if (products.Any())
+                {
+                    <div class="grid grid-2 gap-2">
+                        @foreach (var p in products)
+                        {
+                            <partial name="_ProductCard" model="p" />
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <div class="empty-art">🌱</div>
+                        <h3>Resting this week</h3>
+                        <p class="muted">This grower has no active listings right now — check back before the next market day.</p>
+                    </div>
+                }
+
+                <div class="card card-pad mt-3">
+                    <div class="section-kicker">Customer reviews</div>
+                    @if (reviews.Any())
+                    {
+                        @foreach (var r in reviews)
+                        {
+                            <div class="review-item">
+                                <div class="d-flex justify-between align-center">
+                                    <strong>@r.Customer?.FullName</strong>
+                                    <span class="stars">
+                                        @for (var i = 1; i <= 5; i++) { <span class="@(i <= r.Rating ? "" : "dim")">★</span> }
+                                    </span>
+                                </div>
+                                <div class="muted" style="font-size:.83rem;">@r.Product?.Name · @r.ReviewDate.ToString("d MMM yyyy")</div>
+                                @if (!string.IsNullOrEmpty(r.Comment))
+                                {
+                                    <p class="mt-1 mb-0" style="font-style:italic;">“@r.Comment”</p>
+                                }
+                                @if (!string.IsNullOrEmpty(r.FarmerResponse))
+                                {
+                                    <div class="review-response">
+                                        <div class="who">Response from the grower</div>
+                                        @r.FarmerResponse
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="muted mb-0">No reviews yet for this stall.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+    {
+        <script>
+            (function () {
+                var pts = [{ lat: @Model.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), lng: @Model.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), title: "@(Model.StallName ?? Model.FullName)", subtitle: "@Model.Address" }];
+                if (window.initMap) window.initMap("farmerMap", pts, 13);
+            })();
+        </script>
+    }
+}

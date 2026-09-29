@@ -1,0 +1,67 @@
+@model List<User>
+@{
+    ViewData["Title"] = "Manage customers";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Customers</span></div>
+        <h1>Customer accounts</h1>
+        <p>Activate or deactivate accounts in case of policy violations.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="table-wrap reveal">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Contact</th>
+                        <th>Orders</th>
+                        <th>Registered</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong style="color: var(--forest-900);">@c.FullName</strong><br />
+                                <span class="muted" style="font-size:.82rem;">@c.Address</span>
+                            </td>
+                            <td>
+                                @c.Email<br />
+                                <span class="muted" style="font-size:.82rem;">@c.Phone</span>
+                            </td>
+                            <td>@c.Orders.Count</td>
+                            <td>@c.CreatedAt.ToString("d MMM yyyy")</td>
+                            <td>
+                                @if (c.IsActive)
+                                {
+                                    <span class="pill pill-accepted">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="pill pill-cancelled">Deactivated</span>
+                                }
+                            </td>
+                            <td>
+                                <form asp-action="ToggleCustomer" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@c.Id" />
+                                    <button type="submit" class="btn @(c.IsActive ? "btn-danger" : "btn-leaf") btn-sm">
+                                        @(c.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

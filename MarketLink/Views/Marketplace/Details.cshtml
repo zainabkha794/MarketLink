@@ -1,0 +1,191 @@
+@model Product
+@{
+    ViewData["Title"] = Model.Name;
+    var related = ViewBag.Related as List<Product> ?? new List<Product>();
+    var reviews = Model.Reviews?.Where(r => r.IsVisible).OrderByDescending(r => r.ReviewDate).ToList() ?? new List<Review>();
+    var avgRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
+}
+
+<header class="page-hero" style="padding-bottom: 84px;">
+    <div class="container">
+        <div class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Home</a> <span>›</span>
+            <a asp-controller="Marketplace" asp-action="Index">Marketplace</a> <span>›</span>
+            <span>@Model.Name</span>
+        </div>
+    </div>
+</header>
+
+<section class="section-tight" style="margin-top:-46px;">
+    <div class="container">
+        <div class="card reveal" style="padding: 34px;">
+            <div class="grid grid-2" style="gap: 44px; align-items: start;">
+                <div class="detail-media">
+                    <img src="@Model.ImageUrl" alt="@Model.Name" data-fallback="@Model.Name" />
+                </div>
+
+                <div>
+                    <div class="product-cat">@Model.Category?.Name</div>
+                    <h1 style="font-size: clamp(1.9rem, 3vw, 2.5rem); margin: 8px 0 10px;">@Model.Name</h1>
+
+                    <div class="rating-line mb-2">
+                        <span class="stars">
+                            @for (var i = 1; i <= 5; i++)
+                            {
+                                <span class="@(i <= Math.Round(avgRating) ? "" : "dim")">★</span>
+                            }
+                        </span>
+                        <span>@avgRating.ToString("0.0") · @reviews.Count review(s)</span>
+                    </div>
+
+                    <div class="price" style="font-size:2.1rem;">Rs @Model.Price.ToString("N0") <small>/ @Model.Unit</small></div>
+
+                    <p class="muted mt-2" style="font-size:1.05rem;">@Model.Description</p>
+
+                    <div class="meta-list">
+                        <div class="meta-item">
+                            <div class="mi-icon">🌾</div>
+                            <div>
+                                <div class="mi-label">Grower</div>
+                                <a asp-action="FarmerProfile" asp-route-id="@Model.FarmerId"><strong>@(Model.Farmer?.StallName ?? Model.Farmer?.FullName)</strong></a>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="mi-icon">📦</div>
+                            <div>
+                                <div class="mi-label">Availability</div>
+                                @if (Model.IsSoldOut || Model.StockQuantity == 0)
+                                {
+                                    <span class="pill pill-cancelled">Sold out this week</span>
+                                }
+                                else
+                                {
+                                    <span class="pill pill-accepted">@Model.StockQuantity @Model.Unit available</span>
+                                }
+                            </div>
+                        </div>
+                        @if (Model.IsRecurringWeekly)
+                        {
+                            <div class="meta-item">
+                                <div class="mi-icon">🔄</div>
+                                <div>
+                                    <div class="mi-label">Stock pattern</div>
+                                    Listed every week — restocked at the start of each market week.
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    @if (!Model.IsSoldOut && Model.StockQuantity > 0)
+                    {
+                        <form asp-controller="PreOrder" asp-action="AddToCart" method="post" class="d-flex gap-2 align-center flex-wrap mt-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
+                            <div class="qty-stepper">
+                                <button type="button" data-step="-1">−</button>
+                                <input type="number" name="quantity" value="1" min="1" max="@Model.StockQuantity" />
+                                <button type="button" data-step="1">+</button>
+                            </div>
+                            <button type="submit" class="btn btn-gold btn-lg">Add to basket</button>
+                        </form>
+                    }
+
+                    <form asp-controller="Customer" asp-action="ToggleFavorite" method="post" class="mt-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
+                        <button type="submit" class="btn btn-ghost btn-sm">♡ Save to favourites</button>
+                    </form>
+
+                    <p class="form-text mt-2">🧺 Payment is settled in person when you collect at the market stall.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reviews -->
+<section class="section-tight">
+    <div class="container">
+        <div class="grid grid-2" style="gap: 36px; align-items: start;">
+            <div class="card card-pad reveal">
+                <div class="section-kicker">What customers say</div>
+                <h2 style="font-size:1.75rem;">Reviews</h2>
+                @if (reviews.Any())
+                {
+                    <div>
+                        @foreach (var r in reviews)
+                        {
+                            <div class="review-item">
+                                <div class="d-flex justify-between align-center">
+                                    <strong>@r.Customer?.FullName</strong>
+                                    <span class="stars">
+                                        @for (var i = 1; i <= 5; i++) { <span class="@(i <= r.Rating ? "" : "dim")">★</span> }
+                                    </span>
+                                </div>
+                                <div class="muted" style="font-size:.84rem;">@r.ReviewDate.ToString("d MMM yyyy")</div>
+                                @if (!string.IsNullOrEmpty(r.Comment))
+                                {
+                                    <p class="mt-1 mb-0" style="font-style:italic;">“@r.Comment”</p>
+                                }
+                                @if (!string.IsNullOrEmpty(r.FarmerResponse))
+                                {
+                                    <div class="review-response">
+                                        <div class="who">Response from the grower</div>
+                                        @r.FarmerResponse
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="muted">No reviews yet — be the first to share your thoughts after your order is complete.</p>
+                }
+            </div>
+
+            <div class="card card-pad reveal">
+                <div class="section-kicker">About the grower</div>
+                <h2 style="font-size:1.75rem;">@(Model.Farmer?.StallName ?? Model.Farmer?.FullName)</h2>
+                <p class="muted">@(Model.Farmer?.Bio ?? "A local grower bringing the harvest to market each week.")</p>
+                <div class="meta-list">
+                    @if (!string.IsNullOrEmpty(Model.Farmer?.Address))
+                    {
+                        <div class="meta-item">
+                            <div class="mi-icon">📍</div>
+                            <div><div class="mi-label">Location</div>@Model.Farmer.Address</div>
+                        </div>
+                    }
+                    <div class="meta-item">
+                        <div class="mi-icon">🕰</div>
+                        <div>
+                            <div class="mi-label">Order cut-off</div>
+                            Modifications close @Model.Farmer?.OrderCutoffHours hours before pickup.
+                        </div>
+                    </div>
+                </div>
+                <a class="btn btn-forest" asp-action="FarmerProfile" asp-route-id="@Model.FarmerId">Visit the stall</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (related.Any())
+{
+    <section class="section section-parchment">
+        <div class="container">
+            <div class="section-head">
+                <div class="section-kicker">You may also like</div>
+                <h2>From the same larder</h2>
+            </div>
+            <div class="grid grid-4 product-grid">
+                @foreach (var p in related)
+                {
+                    <partial name="_ProductCard" model="p" />
+                }
+            </div>
+        </div>
+    </section>
+}

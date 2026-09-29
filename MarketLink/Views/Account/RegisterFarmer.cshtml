@@ -1,0 +1,107 @@
+@model RegisterFarmerViewModel
+@{
+    ViewData["Title"] = "Open a stall";
+    var markets = ViewBag.Markets as List<Market> ?? new List<Market>();
+}
+
+<div class="auth-shell">
+    <div class="auth-visual">
+        <div class="auth-img"></div>
+        <div class="auth-quote">
+            <blockquote>“Harvest what has been reserved. Meet the people who eat your food.”</blockquote>
+            <cite>Growers of MarketLink</cite>
+        </div>
+    </div>
+    <div class="auth-panel">
+        <div class="form-card">
+            <div class="section-kicker" style="justify-content:center;">For growers</div>
+            <h1 style="font-size:1.95rem;">Open your stall</h1>
+            <p class="muted text-center mb-3">New stalls are reviewed by the platform office before going live.</p>
+
+            <form asp-action="RegisterFarmer" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="StallName"></label>
+                        <input class="form-control" asp-for="StallName" placeholder="e.g. Willowbrook Farm" />
+                        <span asp-validation-for="StallName" class="field-validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="FullName"></label>
+                        <input class="form-control" asp-for="FullName" placeholder="Contact person" />
+                        <span asp-validation-for="FullName" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Email"></label>
+                        <input class="form-control" asp-for="Email" placeholder="stall@example.com" />
+                        <span asp-validation-for="Email" class="field-validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Phone"></label>
+                        <input class="form-control" asp-for="Phone" placeholder="+92 3XX XXX XXXX" />
+                        <span asp-validation-for="Phone" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="Address"></label>
+                    <input class="form-control" asp-for="Address" placeholder="Farm or stall address" />
+                    <span asp-validation-for="Address" class="field-validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="Bio"></label>
+                    <textarea class="form-control" asp-for="Bio" rows="3" placeholder="Tell customers about your farm, your methods and what you are known for…"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Markets you sell at</label>
+                    <div class="grid grid-2 gap-1">
+                        @foreach (var m in markets)
+                        {
+                            <label class="form-check">
+                                <input type="checkbox" name="MarketIds" value="@m.Id" /> @m.Name
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Latitude"></label>
+                        <input class="form-control" asp-for="Latitude" step="0.000001" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Longitude"></label>
+                        <input class="form-control" asp-for="Longitude" step="0.000001" />
+                    </div>
+                </div>
+                <p class="form-text">Stall pin shown on the map — default is Karachi. Change to your market location.</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Password"></label>
+                        <input class="form-control" asp-for="Password" placeholder="Min. 6 characters" />
+                        <span asp-validation-for="Password" class="field-validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="ConfirmPassword"></label>
+                        <input class="form-control" asp-for="ConfirmPassword" placeholder="Repeat password" />
+                        <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-gold btn-block btn-lg">Submit stall application</button>
+            </form>
+
+            <div class="auth-links">
+                Shopping instead? <a asp-action="Register"><strong>Create a customer account →</strong></a>
+            </div>
+        </div>
+    </div>
+</div>

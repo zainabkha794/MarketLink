@@ -1,0 +1,246 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Fresh from Local Farms";
+}
+
+<!-- ═══════════ HERO ═══════════ -->
+<header class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-veil"></div>
+    <div class="container hero-inner">
+        <div>
+            <span class="hero-eyebrow"><span class="pulse"></span> Harvest season is open</span>
+            <h1>
+                The countryside market,<br />
+                <span class="accent">reserved for you.</span>
+            </h1>
+            <p class="lead">
+                MarketLink brings the heritage farmers market online — browse this week's harvest from
+                local growers, reserve your basket for pickup, and know exactly what waits at the stall.
+            </p>
+            <div class="hero-cta">
+                <a class="btn btn-gold btn-lg" asp-controller="Marketplace" asp-action="Index">Browse the harvest</a>
+                <a class="btn btn-ghost btn-lg" asp-controller="Markets" asp-action="Index">Find a market near you</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><div class="num">@Model.FarmerCount+</div><div class="lbl">Local growers</div></div>
+                <div class="hero-stat"><div class="num">@Model.MarketCount</div><div class="lbl">Farmers markets</div></div>
+                <div class="hero-stat"><div class="num">@Model.ProductCount</div><div class="lbl">Fresh listings</div></div>
+                <div class="hero-stat"><div class="num">@Model.OrderCount+</div><div class="lbl">Baskets reserved</div></div>
+            </div>
+        </div>
+
+        <div class="hero-cards">
+            <div class="hero-card hero-card-1">
+                <img src="images/about.jpg" alt="A basket of heritage produce" />
+            </div>
+            <div class="hero-card hero-card-2">
+                <img src="images/hero.jpg" alt="Morning in the market garden" />
+            </div>
+            <div class="hero-chip hero-chip-a">
+                <div class="chip-icon">🧺</div>
+                <div>
+                    <div class="chip-title">Reserve · Pay at pickup</div>
+                    <div class="chip-sub">No cards, no couriers — just the market</div>
+                </div>
+            </div>
+            <div class="hero-chip hero-chip-b">
+                <div class="chip-icon">🌿</div>
+                <div>
+                    <div class="chip-title">Picked this morning</div>
+                    <div class="chip-sub">Stock updates every week</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <svg class="wave-divider" viewBox="0 0 1440 64" preserveAspectRatio="none">
+        <path d="M0,32 C240,64 480,0 720,24 C960,48 1200,64 1440,24 L1440,64 L0,64 Z"></path>
+    </svg>
+</header>
+
+<!-- ═══════════ ANNOUNCEMENTS ═══════════ -->
+@if (Model.Announcements.Any())
+{
+    <section class="section-tight">
+        <div class="container">
+            @foreach (var a in Model.Announcements)
+            {
+                <div class="flash flash-info reveal" style="margin-bottom:14px;">
+                    <span class="flash-icon">📣</span>
+                    <div>
+                        <strong>@a.Title</strong><br />
+                        @a.Message
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- ═══════════ CATEGORIES ═══════════ -->
+<section class="section">
+    <div class="container">
+        <div class="section-head reveal">
+            <div class="section-kicker">The larder</div>
+            <h2>Shop by the season's best</h2>
+            <p class="muted">Vegetables dug this morning, orchard fruit at its peak, dairy from pasture-fed herds and bread from the stone hearth.</p>
+        </div>
+        <div class="grid grid-4">
+            @foreach (var cat in Model.Categories.Take(8))
+            {
+                <a class="cat-tile reveal" asp-controller="Marketplace" asp-action="Index" asp-route-category="@cat.Name">
+                    <img src="@cat.ImageUrl" alt="@cat.Name" data-fallback="🌿" onerror="this.style.display='none'" />
+                    <div class="cat-veil"></div>
+                    <div class="cat-name">
+                        <small>@cat.Description</small>
+                        @cat.Name
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ FEATURED PRODUCTS ═══════════ -->
+<section class="section section-parchment">
+    <div class="container">
+        <div class="section-head reveal">
+            <div class="section-kicker">Just in</div>
+            <h2>This week's harvest</h2>
+            <p class="muted">Reserve before the market bell — popular items sell out fast.</p>
+        </div>
+
+        <div class="grid grid-4 product-grid">
+            @foreach (var p in Model.FeaturedProducts)
+            {
+                <partial name="_ProductCard" model="p" />
+            }
+        </div>
+
+        <div class="text-center mt-4 reveal">
+            <a class="btn btn-forest btn-lg" asp-controller="Marketplace" asp-action="Index">See the full marketplace</a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ HOW IT WORKS ═══════════ -->
+<section class="section">
+    <div class="container">
+        <div class="section-head reveal">
+            <div class="section-kicker">The simple way</div>
+            <h2>From the field to your table</h2>
+            <p class="muted">No delivery vans, no middlemen — just a well-planned trip to the market.</p>
+        </div>
+        <div class="grid grid-3">
+            <div class="card step-card reveal">
+                <div class="step-num">1</div>
+                <h3>Browse the harvest</h3>
+                <p class="muted mb-0">Explore produce by category, market day or grower. Every listing shows live stock, price and the farm behind it.</p>
+            </div>
+            <div class="card step-card reveal">
+                <div class="step-num">2</div>
+                <h3>Reserve your basket</h3>
+                <p class="muted mb-0">Add items to your basket and choose a pickup window at the farmer's stall. You only pay in person at the market.</p>
+            </div>
+            <div class="card step-card reveal">
+                <div class="step-num">3</div>
+                <h3>Collect at the market</h3>
+                <p class="muted mb-0">Your order is packed and ready at your chosen time. Say hello to the grower — and rate the produce afterwards.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ MARKETS STRIP ═══════════ -->
+<section class="section section-forest">
+    <div class="container">
+        <div class="section-head reveal">
+            <div class="section-kicker">Where we gather</div>
+            <h2>Markets with character</h2>
+            <p class="muted">Every market has its own rhythm — find the day and place that suits you, with maps and directions built in.</p>
+        </div>
+        <div class="grid grid-3">
+            @foreach (var m in Model.Markets)
+            {
+                <a class="market-card reveal" asp-controller="Markets" asp-action="Details" asp-route-id="@m.Id">
+                    <img src="@m.ImageUrl" alt="@m.Name" onerror="this.style.display='none'" />
+                    <div class="market-veil"></div>
+                    <div class="market-content">
+                        <h3>@m.Name</h3>
+                        <div class="market-days">
+                            @foreach (var day in m.OperatingDays.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <span class="day-pill">@day.Trim()</span>
+                            }
+                        </div>
+                        <div style="font-size:.88rem; color: rgba(251,247,236,.75); margin-top:8px;">
+                            @m.OpenTime.ToString(@"hh\:mm") – @m.CloseTime.ToString(@"hh\:mm") · @m.City
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+        <div class="text-center mt-4">
+            <a class="btn btn-outline-gold" asp-controller="Markets" asp-action="Index">View all markets &amp; maps</a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TESTIMONIALS ═══════════ -->
+<section class="section">
+    <div class="container">
+        <div class="section-head reveal">
+            <div class="section-kicker">Kind words</div>
+            <h2>Loved by market people</h2>
+        </div>
+        <div class="grid grid-3">
+            <div class="card quote-card reveal">
+                <div class="quote-text">"I now know exactly which stalls will be at the market before I leave the house. No more wasted Saturday trips."</div>
+                <div class="quote-author">
+                    <div class="avatar">SW</div>
+                    <div>
+                        <strong>Sophia Whitmore</strong><br />
+                        <span class="muted" style="font-size:.85rem;">Clifton Green regular</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card quote-card reveal">
+                <div class="quote-text">"Pre-orders changed my business. I harvest exactly what has been reserved — nothing wilts, nothing is wasted."</div>
+                <div class="quote-author">
+                    <div class="avatar">HG</div>
+                    <div>
+                        <strong>Harold Green</strong><br />
+                        <span class="muted" style="font-size:.85rem;">Willowbrook Farm</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card quote-card reveal">
+                <div class="quote-text">"The produce tastes the way my grandmother's garden used to. The honey and sourdough are worth crossing the city for."</div>
+                <div class="quote-author">
+                    <div class="avatar">AS</div>
+                    <div>
+                        <strong>Amelia Stone</strong><br />
+                        <span class="muted" style="font-size:.85rem;">Bath Island</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ CTA ═══════════ -->
+<section class="section-tight">
+    <div class="container">
+        <div class="cta-band reveal">
+            <div>
+                <div class="section-kicker" style="color: var(--gold-300);">Growers wanted</div>
+                <h2>Bring your stall to MarketLink</h2>
+                <p>Publish your weekly stock, accept pre-orders and build a loyal following — an admin reviews every new stall to keep the marketplace trustworthy.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-gold btn-lg" asp-controller="Account" asp-action="RegisterFarmer">Open a stall</a>
+                <a class="btn btn-ghost btn-lg" asp-controller="Home" asp-action="About">How it works</a>
+            </div>
+        </div>
+    </div>
+</section>

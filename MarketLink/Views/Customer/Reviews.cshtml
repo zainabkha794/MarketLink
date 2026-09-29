@@ -1,0 +1,61 @@
+@model List<Review>
+@{
+    ViewData["Title"] = "My reviews";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Customer" asp-action="Dashboard">Dashboard</a> <span>›</span> <span>My reviews</span></div>
+        <h1>Reviews you have written</h1>
+        <p>Your words help growers and fellow market people.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container-narrow">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-art">★</div>
+                <h3>No reviews yet</h3>
+                <p class="muted">After collecting an order you can rate the produce — open the order from your dashboard.</p>
+                <a class="btn btn-gold" asp-controller="PreOrder" asp-action="Orders">Go to my orders</a>
+            </div>
+        }
+        else
+        {
+            <div class="card card-pad reveal">
+                @foreach (var r in Model)
+                {
+                    <div class="review-item">
+                        <div class="d-flex justify-between align-center">
+                            <strong style="color: var(--forest-900);">@r.Product?.Name</strong>
+                            <span class="stars">
+                                @for (var i = 1; i <= 5; i++) { <span class="@(i <= r.Rating ? "" : "dim")">★</span> }
+                            </span>
+                        </div>
+                        <div class="muted" style="font-size:.84rem;">
+                            @(r.Product?.Farmer?.StallName ?? r.Product?.Farmer?.FullName) · @r.ReviewDate.ToString("d MMMM yyyy")
+                        </div>
+                        @if (!string.IsNullOrEmpty(r.Comment))
+                        {
+                            <p class="mt-1" style="font-style:italic;">“@r.Comment”</p>
+                        }
+                        @if (!string.IsNullOrEmpty(r.FarmerResponse))
+                        {
+                            <div class="review-response">
+                                <div class="who">Grower's response</div>
+                                @r.FarmerResponse
+                            </div>
+                        }
+                        <form asp-action="DeleteReview" method="post" class="mt-2" onsubmit="return confirm('Remove this review?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@r.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Delete review</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,128 @@
+@model CartViewModel
+@{
+    ViewData["Title"] = "Your basket";
+    var byFarmer = Model.Items.GroupBy(i => i.FarmerId).ToList();
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a> <span>›</span> <span>Your basket</span></div>
+        <h1>Your market basket</h1>
+        <p>@Model.TotalItems item(s) from @Model.FarmerCount grower(s) — reserve now, settle at pickup.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        @if (!Model.Items.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-art">🧺</div>
+                <h3>Your basket is empty</h3>
+                <p class="muted">Fill it with this week's harvest — vegetables, fruit, dairy, breads and more.</p>
+                <a class="btn btn-gold" asp-controller="Marketplace" asp-action="Index">Browse the marketplace</a>
+            </div>
+        }
+        else
+        {
+            <div class="grid" style="grid-template-columns: 1.7fr 1fr; gap: 32px; align-items: start;">
+                <div>
+                    @foreach (var group in byFarmer)
+                    {
+                        var farmer = group.First();
+                        <div class="card mb-3 reveal">
+                            <div class="card-pad d-flex justify-between align-center" style="padding-bottom:10px;">
+                                <div class="d-flex gap-2 align-center">
+                                    <div class="avatar">🌾</div>
+                                    <div>
+                                        <strong style="font-family:var(--font-display); font-size:1.12rem;">@farmer.FarmerName</strong><br />
+                                        <span class="muted" style="font-size:.84rem;">@group.Count() item(s) · separate order &amp; pickup</span>
+                                    </div>
+                                </div>
+                                <a class="btn btn-ghost btn-sm" asp-controller="Marketplace" asp-action="FarmerProfile" asp-route-id="@farmer.FarmerId">Visit stall</a>
+                            </div>
+                            <div class="table-wrap" style="border:none; box-shadow:none;">
+                                <table class="table" style="min-width:0;">
+                                    <tbody>
+                                        @foreach (var item in group)
+                                        {
+                                            <tr>
+                                                <td style="width:84px;">
+                                                    <div style="width:72px;height:64px;border-radius:12px;overflow:hidden;background:var(--mint-100);">
+                                                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                        {
+                                                            <img src="@item.ImageUrl" alt="@item.Name" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+                                                        }
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <strong style="color: var(--forest-900);">@item.Name</strong><br />
+                                                    <span class="muted" style="font-size:.85rem;">Rs @item.Price.ToString("N0") / @item.Unit</span>
+                                                </td>
+                                                <td>
+                                                    <form asp-action="UpdateCart" method="post" class="d-flex gap-1 align-center">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                                        <div class="qty-stepper">
+                                                            <button type="button" data-step="-1">−</button>
+                                                            <input type="number" name="quantity" value="@item.Quantity" min="1" />
+                                                            <button type="button" data-step="1">+</button>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-ghost btn-sm">Update</button>
+                                                    </form>
+                                                </td>
+                                                <td style="text-align:right;">
+                                                    <div class="price" style="font-size:1.18rem;">Rs @item.LineTotal.ToString("N0")</div>
+                                                </td>
+                                                <td style="width:52px;">
+                                                    <form asp-action="RemoveFromCart" method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                                        <button type="submit" class="btn btn-danger btn-sm" title="Remove">×</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="card card-pad reveal" style="position:sticky; top:100px;">
+                    <div class="section-kicker">Summary</div>
+                    <h3 style="font-size:1.55rem;">Your reservation</h3>
+                    <div class="d-flex justify-between" style="padding:9px 0; border-bottom:1px dashed rgba(27,67,50,.14);">
+                        <span class="muted">Subtotal</span>
+                        <strong>Rs @Model.Subtotal.ToString("N0")</strong>
+                    </div>
+                    <div class="d-flex justify-between" style="padding:9px 0; border-bottom:1px dashed rgba(27,67,50,.14);">
+                        <span class="muted">Grower orders</span>
+                        <strong>@Model.FarmerCount</strong>
+                    </div>
+                    <div class="d-flex justify-between" style="padding:9px 0; border-bottom:1px dashed rgba(27,67,50,.14);">
+                        <span class="muted">Payment</span>
+                        <strong class="text-forest">At pickup 🌿</strong>
+                    </div>
+                    <div class="d-flex justify-between mt-2" style="font-size:1.15rem;">
+                        <strong>Total</strong>
+                        <strong class="text-gold" style="font-family:var(--font-display); font-size:1.55rem;">Rs @Model.Subtotal.ToString("N0")</strong>
+                    </div>
+
+                    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Customer"))
+                    {
+                        <a class="btn btn-gold btn-block btn-lg mt-3" asp-action="Checkout">Choose pickup &amp; reserve</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-gold btn-block btn-lg mt-3" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/PreOrder/Checkout">Sign in to reserve</a>
+                        <p class="form-text text-center">Customers must sign in to place a pre-order.</p>
+                    }
+                    <a class="btn btn-ghost btn-block mt-1" asp-controller="Marketplace" asp-action="Index">Continue browsing</a>
+                    <p class="form-text text-center mt-2">🧺 Each grower prepares a separate basket for pickup at their stall.</p>
+                </div>
+            </div>
+        }
+    </div>
+</section>

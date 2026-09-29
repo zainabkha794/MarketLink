@@ -1,0 +1,86 @@
+@model Market
+@{
+    ViewData["Title"] = Model.Name;
+    var farmers = Model.FarmerLinks?.Select(mf => mf.Farmer).Where(f => f != null && f.IsApproved && f.IsActive).ToList() ?? new List<User>();
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Home</a> <span>›</span>
+            <a asp-action="Index">Markets</a> <span>›</span>
+            <span>@Model.Name</span>
+        </div>
+        <h1>@Model.Name</h1>
+        <p>@Model.Address · @Model.City</p>
+        <div class="market-days">
+            @foreach (var day in Model.OperatingDays.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                <span class="day-pill">@day.Trim()</span>
+            }
+            <span class="day-pill">@Model.OpenTime.ToString(@"hh\:mm") – @Model.CloseTime.ToString(@"hh\:mm")</span>
+        </div>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="grid grid-2" style="gap:36px; align-items:start;">
+            <div class="reveal">
+                <div class="map-frame" style="height:380px;">
+                    <div class="map-fallback"><div>📍 @Model.Name</div></div>
+                    <div id="marketMap" style="height:380px;"></div>
+                </div>
+                <div class="card card-pad mt-3">
+                    <div class="section-kicker">About this market</div>
+                    <p class="muted mb-0">@(Model.Description ?? "A neighbourhood farmers market bringing local growers and their communities together.")</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-kicker">Who will be here</div>
+                <h2 style="font-size:1.85rem;">Growers at this market</h2>
+                @if (farmers.Any())
+                {
+                    @foreach (var f in farmers)
+                    {
+                        var stall = Model.FarmerLinks?.FirstOrDefault(mf => mf.FarmerId == f.Id)?.StallLocation;
+                        var productCount = f.Products?.Count(p => p.IsVisible && p.IsAvailable) ?? 0;
+                        <a class="card card-pad mb-2 d-flex gap-2 align-center reveal" style="text-decoration:none;"
+                           asp-controller="Marketplace" asp-action="FarmerProfile" asp-route-id="@f.Id">
+                            <div class="avatar" style="width:52px;height:52px;flex-basis:52px;font-size:1.15rem;">
+                                @(f.FullName.Split(' ').Select(s => s.FirstOrDefault()).Aggregate("", (a, b) => a + b))
+                            </div>
+                            <div style="flex:1;">
+                                <strong style="color: var(--forest-900); font-family: var(--font-display); font-size:1.12rem;">
+                                    @(f.StallName ?? f.FullName)
+                                </strong><br />
+                                <span class="muted" style="font-size:.88rem;">
+                                    @(stall != null ? stall + " · " : "")@productCount listing(s) this week
+                                </span>
+                            </div>
+                            <span class="btn btn-ghost btn-sm">Visit stall →</span>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <div class="empty-art">🌾</div>
+                        <h3>Stalls being arranged</h3>
+                        <p class="muted">Grower listings for this market are coming soon.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            var pts = [{ lat: @Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture), lng: @Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture), title: "@Model.Name", subtitle: "@Model.Address" }];
+            if (window.initMap) window.initMap("marketMap", pts, 14);
+        })();
+    </script>
+}

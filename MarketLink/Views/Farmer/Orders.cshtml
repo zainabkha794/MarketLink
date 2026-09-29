@@ -1,0 +1,127 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Pre-orders";
+    var counts = ViewBag.StatusCounts as Dictionary<OrderStatus, int> ?? new Dictionary<OrderStatus, int>();
+    var current = ViewBag.CurrentStatus as string;
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Pre-orders</span></div>
+        <h1>Incoming pre-orders</h1>
+        <p>Accept, decline and mark baskets ready for pickup.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="d-flex gap-1 flex-wrap mb-3">
+            <a class="btn @(string.IsNullOrEmpty(current) ? "btn-forest" : "btn-ghost") btn-sm" asp-action="Orders">All</a>
+            @foreach (OrderStatus s in Enum.GetValues(typeof(OrderStatus)))
+            {
+                var count = counts.GetValueOrDefault(s);
+                <a class="btn @(current == s.ToString() ? "btn-forest" : "btn-ghost") btn-sm" asp-action="Orders" asp-route-status="@s">@s (@count)</a>
+            }
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-art">📦</div>
+                <h3>No pre-orders here</h3>
+                <p class="muted">When customers reserve your produce, their orders appear on this page.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var o in Model)
+            {
+                var cls = o.Status switch
+                {
+                    OrderStatus.Placed => "pill-placed",
+                    OrderStatus.Accepted => "pill-accepted",
+                    OrderStatus.ReadyForPickup => "pill-ready",
+                    OrderStatus.Completed => "pill-completed",
+                    OrderStatus.Declined => "pill-declined",
+                    _ => "pill-cancelled"
+                };
+                <div class="card card-pad mb-2 reveal">
+                    <div class="d-flex justify-between align-center flex-wrap gap-2">
+                        <div>
+                            <strong style="font-family:var(--font-display); font-size:1.18rem; color: var(--forest-900);">@o.OrderNumber</strong>
+                            <span class="pill @cls" style="margin-left:8px;">@o.Status</span>
+                            <div class="muted" style="font-size:.9rem;">
+                                @o.Customer?.FullName · @(o.Customer?.Phone ?? "") · placed @o.OrderDate.ToString("d MMM HH:mm")
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="price">Rs @o.TotalAmount.ToString("N0")</div>
+                            <div class="muted" style="font-size:.85rem;">pickup @o.PickupDate.ToString("ddd, d MMM") · @o.PickupWindow</div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap mt-2" style="border:none; box-shadow:none;">
+                        <table class="table" style="min-width:0;">
+                            <tbody>
+                                @foreach (var item in o.Items)
+                                {
+                                    <tr>
+                                        <td><strong>@item.ProductName</strong></td>
+                                        <td class="muted">@item.Quantity × @item.Unit</td>
+                                        <td>Rs @item.UnitPrice.ToString("N0")</td>
+                                        <td style="text-align:right;"><strong>Rs @item.LineTotal.ToString("N0")</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(o.CustomerNote))
+                    {
+                        <div class="review-response">
+                            <div class="who">Customer note</div>
+                            @o.CustomerNote
+                        </div>
+                    }
+
+                    <div class="d-flex gap-1 flex-wrap mt-3">
+                        @if (o.Status == OrderStatus.Placed)
+                        {
+                            <form asp-action="UpdateOrderStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@o.Id" />
+                                <input type="hidden" name="status" value="Accepted" />
+                                <button type="submit" class="btn btn-leaf btn-sm">✓ Accept</button>
+                            </form>
+                            <form asp-action="UpdateOrderStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@o.Id" />
+                                <input type="hidden" name="status" value="Declined" />
+                                <button type="submit" class="btn btn-danger btn-sm">× Decline</button>
+                            </form>
+                        }
+                        else if (o.Status == OrderStatus.Accepted)
+                        {
+                            <form asp-action="UpdateOrderStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@o.Id" />
+                                <input type="hidden" name="status" value="ReadyForPickup" />
+                                <button type="submit" class="btn btn-gold btn-sm">🧺 Mark ready for pickup</button>
+                            </form>
+                        }
+                        else if (o.Status == OrderStatus.ReadyForPickup)
+                        {
+                            <form asp-action="UpdateOrderStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@o.Id" />
+                                <input type="hidden" name="status" value="Completed" />
+                                <button type="submit" class="btn btn-forest btn-sm">✓ Mark collected</button>
+                            </form>
+                        }
+                        <a class="btn btn-ghost btn-sm" asp-controller="Marketplace" asp-action="FarmerProfile" asp-route-id="@o.FarmerId">View public stall</a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>

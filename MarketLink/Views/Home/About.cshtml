@@ -1,0 +1,98 @@
+@{
+    ViewData["Title"] = "Our Story";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a> <span>›</span> <span>Our Story</span></div>
+        <h1>A market day, planned like the old days</h1>
+        <p>Why MarketLink exists, and the people it serves.</p>
+    </div>
+</header>
+
+<section class="section">
+    <div class="container-narrow">
+        <div class="reveal">
+            <div class="section-kicker">The problem</div>
+            <h2>Great produce deserves a better plan</h2>
+            <p class="muted" style="font-size:1.08rem;">
+                Local farmers markets are growing in popularity as shoppers look for fresh, seasonal and locally grown produce.
+                Yet customers rarely know in advance which growers will be at the market, what they have brought, or at what price.
+                Availability is shared through chalkboards, printed flyers and word of mouth — so popular items sell out before
+                you arrive, and some weeks a favourite stall is simply not there.
+            </p>
+            <p class="muted" style="font-size:1.08rem;">
+                Farmers, meanwhile, have no easy way to publicise their weekly inventory, take pre-orders ahead of market day,
+                or build a lasting relationship with regular customers.
+            </p>
+        </div>
+
+        <div class="ornament">❦</div>
+
+        <div class="reveal">
+            <div class="section-kicker">Our answer</div>
+            <h2>One platform, from field to market table</h2>
+            <p class="muted" style="font-size:1.08rem;">
+                MarketLink connects local farmers-market growers with their neighbourhood customers. Farmers register their stall,
+                publish weekly stock and prices, manage incoming pre-orders, and pin their pickup location on the map.
+                Customers discover nearby markets, browse what is available this week, reserve items for pickup, save favourites,
+                and leave reviews after the basket is collected.
+            </p>
+            <p class="muted" style="font-size:1.08rem;">
+                Payment is settled in person at pickup — no gateways, no couriers. The platform simply makes the market day
+                predictable, personal and worth the trip.
+            </p>
+        </div>
+
+        <div class="grid grid-3 mt-4">
+            <div class="stat-card reveal">
+                <div class="stat-label">Our promise</div>
+                <div class="stat-value" style="font-size:1.35rem;">Fresh or not listed</div>
+                <div class="muted">Growers update stock weekly — you only see what truly exists.</div>
+            </div>
+            <div class="stat-card reveal gold">
+                <div class="stat-label">Fair to growers</div>
+                <div class="stat-value" style="font-size:1.35rem;">Zero commissions</div>
+                <div class="muted">Farmers keep every rupee of their sale at the stall.</div>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-label">For the community</div>
+                <div class="stat-value" style="font-size:1.35rem;">Local first</div>
+                <div class="muted">Every listing comes from a grower you can meet in person.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-parchment">
+    <div class="container">
+        <div class="grid grid-2" style="align-items:center; gap:48px;">
+            <div class="detail-media reveal">
+                <img src="~/images/about.jpg" alt="The market table" />
+            </div>
+            <div class="reveal">
+                <div class="section-kicker">The platform</div>
+                <h2>Built on trust, moderated with care</h2>
+                <p class="muted">
+                    An administrator reviews every grower before their stall goes live, keeps an eye on listings and reviews,
+                    and publishes platform announcements so the whole market community stays informed.
+                </p>
+                <ul class="meta-list">
+                    <li class="meta-item">
+                        <div class="mi-icon">🛡</div>
+                        <div><div class="mi-label">Role-based access</div>Farmers, customers and admins each see exactly what they need.</div>
+                    </li>
+                    <li class="meta-item">
+                        <div class="mi-icon">📍</div>
+                        <div><div class="mi-label">Mapped pickup points</div>OpenStreetMap markers and directions to every stall.</div>
+                    </li>
+                    <li class="meta-item">
+                        <div class="mi-icon">🔔</div>
+                        <div><div class="mi-label">Restock alerts</div>Favourite an item and we will tell you the moment it returns.</div>
+                    </li>
+                </ul>
+                <a class="btn btn-forest" asp-controller="Marketplace" asp-action="Index">Explore the marketplace</a>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,71 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="auth-shell">
+    <div class="auth-visual">
+        <div class="auth-img"></div>
+        <div class="auth-quote">
+            <blockquote>“Join a community that knows its growers by name.”</blockquote>
+            <cite>Customers of MarketLink</cite>
+        </div>
+    </div>
+    <div class="auth-panel">
+        <div class="form-card">
+            <div class="section-kicker" style="justify-content:center;">Join the market</div>
+            <h1 style="font-size:1.95rem;">Create your account</h1>
+            <p class="muted text-center mb-3">Reserve produce, save favourites and keep your order history in one place.</p>
+
+            <form asp-action="Register" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="FullName"></label>
+                    <input class="form-control" asp-for="FullName" placeholder="Your full name" />
+                    <span asp-validation-for="FullName" class="field-validation-error"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Email"></label>
+                        <input class="form-control" asp-for="Email" placeholder="you@example.com" />
+                        <span asp-validation-for="Email" class="field-validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Phone"></label>
+                        <input class="form-control" asp-for="Phone" placeholder="+92 3XX XXX XXXX" />
+                        <span asp-validation-for="Phone" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="Address"></label>
+                    <input class="form-control" asp-for="Address" placeholder="Your neighbourhood or delivery-free pickup area" />
+                    <span asp-validation-for="Address" class="field-validation-error"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Password"></label>
+                        <input class="form-control" asp-for="Password" placeholder="Min. 6 characters" />
+                        <span asp-validation-for="Password" class="field-validation-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="ConfirmPassword"></label>
+                        <input class="form-control" asp-for="ConfirmPassword" placeholder="Repeat password" />
+                        <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-gold btn-block btn-lg">Create account</button>
+            </form>
+
+            <div class="auth-links">
+                Already have an account? <a asp-action="Login"><strong>Sign in</strong></a><br />
+                Are you a grower? <a asp-action="RegisterFarmer"><strong>Open a stall instead →</strong></a>
+            </div>
+        </div>
+    </div>
+</div>

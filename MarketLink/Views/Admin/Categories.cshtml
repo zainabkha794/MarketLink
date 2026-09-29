@@ -1,0 +1,87 @@
+@model List<Category>
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Categories</span></div>
+        <h1>Product categories</h1>
+        <p>Master data for the marketplace larder.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="grid" style="grid-template-columns: 1fr 1.3fr; gap:32px; align-items:start;">
+            <div class="form-card reveal">
+                <h3>Add / edit category</h3>
+                <form asp-action="SaveCategory" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="0" />
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        <input class="form-control" name="name" required placeholder="e.g. Vegetables" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input class="form-control" name="description" placeholder="Short tagline" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Image URL</label>
+                        <input class="form-control" name="imageUrl" placeholder="images/cat-vegetables.jpg" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Sort order</label>
+                        <input class="form-control" name="sortOrder" type="number" value="0" />
+                    </div>
+                    <button type="submit" class="btn btn-gold">Add category</button>
+                </form>
+            </div>
+
+            <div class="table-wrap reveal">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Products</th>
+                            <th>Order</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong style="color: var(--forest-900);">@c.Name</strong><br />
+                                    <span class="muted" style="font-size:.82rem;">@c.Description</span>
+                                </td>
+                                <td>@c.Products.Count</td>
+                                <td>@c.SortOrder</td>
+                                <td>
+                                    @if (c.IsActive)
+                                    {
+                                        <span class="pill pill-accepted">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="pill pill-neutral">Hidden</span>
+                                    }
+                                </td>
+                                <td>
+                                    <form asp-action="ToggleCategory" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@c.Id" />
+                                        <button type="submit" class="btn btn-ghost btn-sm">@(c.IsActive ? "Hide" : "Show")</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,95 @@
+@model Market
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Add market" : "Edit market";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Markets">Markets</a> <span>›</span> <span>@(Model.Id == 0 ? "New market" : "Edit market")</span></div>
+        <h1>@(Model.Id == 0 ? "Add a farmers market" : "Edit market")</h1>
+        <p>Coordinates power the OpenStreetMap markers and directions.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container-narrow">
+        <div class="form-card reveal">
+            <form asp-action="SaveMarket" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="Name"></label>
+                    <input class="form-control" asp-for="Name" />
+                    <span asp-validation-for="Name" class="field-validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="Description"></label>
+                    <textarea class="form-control" asp-for="Description" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Address"></label>
+                        <input class="form-control" asp-for="Address" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="City"></label>
+                        <input class="form-control" asp-for="City" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="OperatingDays"></label>
+                        <input class="form-control" asp-for="OperatingDays" placeholder="Saturday,Sunday" />
+                        <p class="form-text">Comma separated day names.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="MapProvider"></label>
+                        <select class="form-select" asp-for="MapProvider">
+                            <option value="OpenStreetMap">OpenStreetMap</option>
+                            <option value="Google Maps">Google Maps</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="OpenTime"></label>
+                        <input class="form-control" asp-for="OpenTime" type="time" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="CloseTime"></label>
+                        <input class="form-control" asp-for="CloseTime" type="time" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="IsActive"></label>
+                        <label class="form-check"><input asp-for="IsActive" /> Active listing</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Latitude"></label>
+                        <input class="form-control" asp-for="Latitude" step="0.000001" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Longitude"></label>
+                        <input class="form-control" asp-for="Longitude" step="0.000001" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="ImageUrl"></label>
+                    <input class="form-control" asp-for="ImageUrl" placeholder="images/market-clifton.jpg" />
+                </div>
+
+                <button type="submit" class="btn btn-gold btn-lg">Save market</button>
+                <a class="btn btn-ghost" asp-action="Markets">Back to markets</a>
+            </form>
+        </div>
+    </div>
+</section>

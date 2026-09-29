@@ -1,0 +1,226 @@
+@using Microsoft.AspNetCore.Identity
+@inject MarketLink.Services.IAuthService Auth
+@{
+    var user = await Auth.CurrentUser(User);
+    var cartCount = 0;
+    var unread = 0;
+    if (user != null)
+    {
+        var db = Context.RequestServices.GetService<MarketLink.Data.MarketLinkContext>();
+        if (db != null)
+        {
+            unread = db.Notifications.Count(n => n.UserId == user.Id && !n.IsRead);
+        }
+    }
+    var cartService = Context.RequestServices.GetService<MarketLink.Services.CartService>();
+    if (cartService != null) { cartCount = cartService.Count(); }
+    var current = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " · " : "")MarketLink — eGreen Basket</title>
+    <meta name="description" content="MarketLink · eGreen Basket — reserve fresh, seasonal produce from local farmers-market growers for pickup at the market." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%231B4332'/%3E%3Cpath d='M16 25c-6-2-9-7-9-13 5 0 8 2 9 5 1-3 4-5 9-5 0 6-3 11-9 13z' fill='%23D9BC63'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- Announcement marquee -->
+    <div class="topbar">
+        <div class="container">
+            <span>🌿 <strong>Pre-orders open</strong> for the weekend market</span>
+            <span class="dot hide-sm">◆</span>
+            <span class="hide-sm">Pay at pickup · no online payments</span>
+            <span class="dot hide-sm">◆</span>
+            <a asp-controller="Marketplace" asp-action="Index" class="hide-sm">Browse this week's harvest →</a>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a class="brand" asp-controller="Home" asp-action="Index">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 21c-5-1.7-7.5-5.8-7.5-10.8 4.2 0 6.7 1.7 7.5 4.2.8-2.5 3.3-4.2 7.5-4.2 0 5-2.5 9.1-7.5 10.8z" fill="#D9BC63"/>
+                        <path d="M12 14.4V21" stroke="#D9BC63" stroke-width="1.6" stroke-linecap="round"/>
+                        <path d="M8.2 7.6C9.4 6 10.8 5 12 4.5c1.2.5 2.6 1.5 3.8 3.1" stroke="#A7D7C5" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span>
+                    <span class="brand-title">MarketLink</span>
+                    <span class="brand-sub">eGreen Basket</span>
+                </span>
+            </a>
+
+            <div class="nav-links" id="navLinks">
+                <a asp-controller="Marketplace" asp-action="Index" class="@(current == "Marketplace" ? "active" : "")">Marketplace</a>
+                <a asp-controller="Markets" asp-action="Index" class="@(current == "Markets" ? "active" : "")">Markets</a>
+                <a asp-controller="Home" asp-action="About" class="@(current == "Home" && (string)ViewContext.RouteData.Values["action"]! == "About" ? "active" : "")">Our Story</a>
+                <a asp-controller="Chatbot" asp-action="Index" class="@(current == "Chatbot" ? "active" : "")">Ask the Garden</a>
+                <a asp-controller="Home" asp-action="Contact">Contact</a>
+            </div>
+
+            <div class="nav-actions">
+                <a class="icon-btn" asp-controller="PreOrder" asp-action="Cart" title="Your basket" aria-label="Your basket">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    @if (cartCount > 0) { <span class="badge-count">@cartCount</span> }
+                </a>
+
+                @if (user != null)
+                {
+                    <a class="icon-btn" asp-controller="Customer" asp-action="Notifications" title="Notifications" aria-label="Notifications">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>
+                        </svg>
+                        @if (unread > 0) { <span class="badge-count green">@unread</span> }
+                    </a>
+
+                    <div class="dropdown" id="userMenu">
+                        <div class="avatar" id="avatarBtn">@(user.FullName.Split(' ').Select(s => s.FirstOrDefault()).Aggregate("", (a, b) => a + b))</div>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-header">
+                                <div class="name">@user.FullName</div>
+                                <div class="role">@user.Role@(user.Role == UserRole.Farmer && !user.IsApproved ? " · pending" : "")</div>
+                            </div>
+                            <hr />
+                            @if (user.Role == UserRole.Customer)
+                            {
+                                <a asp-controller="Customer" asp-action="Dashboard">🏠 My dashboard</a>
+                                <a asp-controller="PreOrder" asp-action="Orders">📦 My orders</a>
+                                <a asp-controller="Customer" asp-action="Favorites">♡ Favourites</a>
+                                <a asp-controller="Customer" asp-action="Reviews">★ My reviews</a>
+                            }
+                            else if (user.Role == UserRole.Farmer)
+                            {
+                                <a asp-controller="Farmer" asp-action="Dashboard">🌾 Farmer dashboard</a>
+                                <a asp-controller="Farmer" asp-action="Products">🧺 My produce</a>
+                                <a asp-controller="Farmer" asp-action="Orders">📦 Pre-orders</a>
+                                <a asp-controller="Farmer" asp-action="Reviews">★ Reviews</a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Admin" asp-action="Dashboard">🛡 Admin dashboard</a>
+                                <a asp-controller="Admin" asp-action="Farmers">👨‍🌾 Farmers</a>
+                                <a asp-controller="Admin" asp-action="Markets">📍 Markets</a>
+                                <a asp-controller="Admin" asp-action="Reports">📊 Reports</a>
+                            }
+                            <a asp-controller="Account" asp-action="Profile">⚙ Account settings</a>
+                            <hr />
+                            <a asp-controller="Account" asp-action="Logout">↩ Sign out</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a class="btn btn-ghost btn-sm" asp-controller="Account" asp-action="Login">Sign in</a>
+                    <a class="btn btn-gold btn-sm keep-mobile" asp-controller="Account" asp-action="Register">Join the market</a>
+                }
+
+                <button class="nav-toggle" id="navToggle" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash messages -->
+    <div class="flash-wrap">
+        <div class="container">
+            @if (TempData["Success"] != null)
+            {
+                <div class="flash flash-success"><span class="flash-icon">✅</span><div>@TempData["Success"]</div></div>
+            }
+            @if (TempData["Info"] != null)
+            {
+                <div class="flash flash-info"><span class="flash-icon">🌾</span><div>@TempData["Info"]</div></div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="flash flash-error"><span class="flash-icon">🍂</span><div>@TempData["Error"]</div></div>
+            }
+        </div>
+    </div>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div>
+                    <a class="brand" asp-controller="Home" asp-action="Index">
+                        <span class="brand-mark" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 21c-5-1.7-7.5-5.8-7.5-10.8 4.2 0 6.7 1.7 7.5 4.2.8-2.5 3.3-4.2 7.5-4.2 0 5-2.5 9.1-7.5 10.8z" fill="#D9BC63"/>
+                                <path d="M12 14.4V21" stroke="#D9BC63" stroke-width="1.6" stroke-linecap="round"/>
+                            </svg>
+                        </span>
+                        <span>
+                            <span class="brand-title">MarketLink</span>
+                            <span class="brand-sub">eGreen Basket</span>
+                        </span>
+                    </a>
+                    <p class="footer-about">
+                        A heritage farmers-market platform where local growers publish their weekly harvest,
+                        customers reserve baskets for pickup, and everyone knows the market day will be worth the trip.
+                    </p>
+                    <p style="color: var(--gold-300); font-family: var(--font-display); font-style: italic;">
+                        “From the field to the market table, unhurried.”
+                    </p>
+                </div>
+                <div>
+                    <h4>Explore</h4>
+                    <a asp-controller="Marketplace" asp-action="Index">Marketplace</a>
+                    <a asp-controller="Markets" asp-action="Index">Markets &amp; maps</a>
+                    <a asp-controller="Chatbot" asp-action="Index">Ask the Garden assistant</a>
+                    <a asp-controller="Home" asp-action="About">Our story</a>
+                    <a asp-controller="Home" asp-action="Contact">Contact us</a>
+                </div>
+                <div>
+                    <h4>For growers</h4>
+                    <a asp-controller="Account" asp-action="RegisterFarmer">Open a stall</a>
+                    <a asp-controller="Farmer" asp-action="Dashboard">Farmer dashboard</a>
+                    <a asp-controller="Farmer" asp-action="Products">Weekly stock</a>
+                    <a asp-controller="Home" asp-action="Privacy">Privacy &amp; terms</a>
+                </div>
+                <div>
+                    <h4>Market office</h4>
+                    <a href="mailto:hello@marketlink.local">hello@marketlink.local</a>
+                    <a href="tel:+9221111000111">+92 21 111 000 111</a>
+                    <p class="mt-2" style="font-size:.9rem; margin:0;">
+                        Clifton Park, Block 5<br />Karachi, Sindh, Pakistan
+                    </p>
+                    <p class="mt-1" style="font-size:.85rem; color: rgba(251,247,236,.55); margin:12px 0 0;">
+                        Market days: Wednesday, Friday, Saturday &amp; Sunday
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>© @DateTime.Now.Year MarketLink · eGreen Basket. Crafted with care for local growers.</div>
+                <div class="socials">
+                    <a href="#" aria-label="Instagram">◻</a>
+                    <a href="#" aria-label="Facebook">◼</a>
+                    <a href="#" aria-label="Twitter">◈</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <a class="chat-fab" asp-controller="Chatbot" asp-action="Index" title="Ask the Garden assistant" aria-label="Chat">💬</a>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

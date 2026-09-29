@@ -1,0 +1,76 @@
+@model List<User>
+@{
+    ViewData["Title"] = "Manage farmers";
+}
+
+<header class="page-hero">
+    <div class="container">
+        <div class="breadcrumb"><a asp-action="Dashboard">Dashboard</a> <span>›</span> <span>Farmers</span></div>
+        <h1>Growers &amp; stalls</h1>
+        <p>Approve new stalls before produce can be listed.</p>
+    </div>
+</header>
+
+<section class="section-tight">
+    <div class="container">
+        <div class="table-wrap reveal">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Stall</th>
+                        <th>Grower</th>
+                        <th>Markets</th>
+                        <th>Listings</th>
+                        <th>Registered</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong style="color: var(--forest-900); font-family: var(--font-display);">@(f.StallName ?? "—")</strong><br />
+                                <span class="muted" style="font-size:.82rem;">@f.Address</span>
+                            </td>
+                            <td>
+                                @f.FullName<br />
+                                <span class="muted" style="font-size:.82rem;">@f.Email</span>
+                            </td>
+                            <td>
+                                @string.Join(", ", f.MarketLinks.Select(mf => mf.Market?.Name).Where(n => n != null))
+                            </td>
+                            <td>@f.Products.Count(p => p.IsVisible)</td>
+                            <td>@f.CreatedAt.ToString("d MMM yyyy")</td>
+                            <td>
+                                @if (!f.IsActive)
+                                {
+                                    <span class="pill pill-cancelled">Inactive</span>
+                                }
+                                else if (f.IsApproved)
+                                {
+                                    <span class="pill pill-accepted">Approved</span>
+                                }
+                                else
+                                {
+                                    <span class="pill pill-placed">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                <form asp-action="ApproveFarmer" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@f.Id" />
+                                    <input type="hidden" name="approve" value="@(!f.IsApproved ? "true" : "false")" />
+                                    <button type="submit" class="btn @(f.IsApproved ? "btn-danger" : "btn-leaf") btn-sm">
+                                        @(f.IsApproved ? "Suspend" : "Approve")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
